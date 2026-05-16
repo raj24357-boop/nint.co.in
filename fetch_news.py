@@ -12,13 +12,12 @@ feeds = {
     "మార్కెట్": "https://news.google.com/rss/search?q=Hyderabad+Market+Prices+Gold+OR+Telangana+Crop+Rates&hl=te&gl=IN&ceid=IN:te"
 }
 
-# 1. Read existing old news from index.html to push them down
+# Read existing old news from index.html to push them down
 old_html = ""
 if os.path.exists("index.html"):
     with open("index.html", "r", encoding="utf-8") as f:
         old_html = f.read()
 
-# Extract old news cards using markers
 old_feeds_match = re.search(r'(.*?)', old_html, re.DOTALL)
 old_feeds_content = old_feeds_match.group(1) if old_feeds_match else ""
 
@@ -39,7 +38,7 @@ for category, url in feeds.items():
             
             title = re.sub(r'\s-\s.*$', '', title)
             
-            # Anti-Duplicate Check: Skip if this headline or link already exists on our site
+            # Anti-Duplicate Check
             if title in old_html or link in old_html:
                 continue
 
@@ -63,7 +62,10 @@ for category, url in feeds.items():
             elif category == "మార్కెట్":
                 img_url = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600"
 
-            # Build new cards
+            # Clean single quotes in title for JavaScript safety
+            safe_title = title.replace("'", "\\'")
+
+            # Build cards with separate action buttons
             new_articles_html += f"""
             <div class="news-card">
                 <img src="{img_url}" alt="NINT Local">
@@ -71,18 +73,24 @@ for category, url in feeds.items():
                     <span class="news-meta">📍 {area_tag} | {current_date}</span>
                     <h2>{title}</h2>
                     <p>{desc[:180]}...</p>
-                    <a href="{link}" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
+                    <div class="card-actions">
+                        <a href="{link}" target="_blank" class="read-more-btn">చదవండి →</a>
+                        <button class="share-btn" onclick="shareNews('{safe_title}', '{link}')">📲 షేర్</button>
+                    </div>
                 </div>
             </div>
             """
     except Exception as e:
         print(f"Error compiling {category}: {e}")
 
-# 2. Combine: New News on Top + Old News at bottom
+# Combine: New News on Top + Old News at bottom
 combined_feeds = new_articles_html + old_feeds_content
 
-# Limit total history to top 45 cards to keep loading speed blazing fast
-all_cards = re.findall(r'<div class="news-card">.*?</div>\s*</div>', combined_feeds, re.DOTALL)
+# Limit total history to top 45 cards
+all_cards = re.findall(r'<div class="news-card">.*?</div>\s*</div>\s*</div>', combined_feeds, re.DOTALL)
+if not all_cards:
+    all_cards = re.findall(r'<div class="news-card">.*?</div>\s*</div>', combined_feeds, re.DOTALL)
+
 final_grid_html = "\n".join(all_cards[:45])
 total_count = len(all_cards[:45])
 
@@ -106,10 +114,18 @@ full_html = f"""<!DOCTYPE html>
         .news-card img {{ width: 100%; height: 200px; object-fit: cover; }}
         .news-body {{ padding: 25px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }}
         .news-meta {{ font-size: 0.85em; color: #dc2626; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; display: block; }}
-        .news-card h2 {{ color: #1c1e21; font-size: 1.4em; font-weight: 800; line-height: 1.4; margin-bottom: 12px; }}
-        .news-card p {{ color: #4b5563; font-size: 1.05em; line-height: 1.6; margin-bottom: 20px; }}
-        .read-more-btn {{ display: inline-block; background-color: #1c1e21; color: white; padding: 10px 20px; text-decoration: none; font-weight: 700; font-size: 0.9em; border-radius: 8px; align-self: flex-start; }}
+        .news-card h2 {{ color: #1c1e21; font-size: 1.35em; font-weight: 800; line-height: 1.4; margin-bottom: 12px; min-height: 2.8em; }}
+        .news-card p {{ color: #4b5563; font-size: 1.02em; line-height: 1.6; margin-bottom: 20px; }}
+        
+        /* Flexbox structure to keep buttons perfectly aligned */
+        .card-actions {{ display: flex; gap: 12px; width: 100%; margin-top: auto; }}
+        .read-more-btn {{ flex: 1; text-align: center; background-color: #1c1e21; color: white; padding: 12px 10px; text-decoration: none; font-weight: 700; font-size: 0.9em; border-radius: 8px; transition: 0.2s; }}
         .read-more-btn:hover {{ background-color: #dc2626; }}
+        
+        /* Share Button Design */
+        .share-btn {{ flex: 1; background-color: #25d366; color: white; border: none; padding: 12px 10px; font-weight: 700; font-size: 0.9em; border-radius: 8px; cursor: pointer; transition: 0.2s; }}
+        .share-btn:hover {{ background-color: #128c7e; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }}
+        
         footer {{ background-color: #18191a; color: #a0aab4; text-align: center; padding: 30px 0; margin-top: 60px; font-weight: bold; border-top: 5px solid #dc2626; }}
     </style>
 </head>
@@ -130,10 +146,31 @@ full_html = f"""<!DOCTYPE html>
     <p>&copy; 2026 NINT NEWS NETWORK • టోటల్ లైవ్ స్టోరీలు: {total_count}</p>
 </footer>
 
+<script>
+function shareNews(title, link) {{
+    const shareData = {{
+        title: title,
+        text: title + " \\n\\n👉 పూర్తి వివరాల కోసం NINT News చూడండి: \\n",
+        url: link
+    }};
+
+    // If mobile device allows native sharing (WhatsApp, Insta, FB list)
+    if (navigator.share) {{
+        navigator.share(shareData)
+            .then(() => console.log('Successfully Shared!'))
+            .catch((error) => console.log('Error sharing:', error));
+    }} else {{
+        // Desktop Fallback: Directly open WhatsApp Web with pre-filled text
+        const whatsappUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(title + "\\n" + link);
+        window.open(whatsappUrl, '_blank');
+    }}
+}}
+</script>
+
 </body>
 </html>"""
 
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(full_html)
-print("Successfully prepended new stories and pushed old stories downside!")
+print("Successfully injected universal social sharing engine!")
             
