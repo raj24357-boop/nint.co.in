@@ -1,39 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="te">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NINT - Premium Automated News Portal</title>
+    <title>NINT - లైవ్ తెలుగు న్యూస్ పోర్టల్</title>
     <style>
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; background-color: #f7f9fc; color: #222; }
-        header { background-color: #111111; color: white; padding: 35px 0; text-align: center; border-bottom: 5px solid #d32f2f; }
-        header h1 { margin: 0; font-size: 3em; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; }
-        header p { color: #bbb; font-size: 1.1em; margin-top: 5px; font-weight: 400; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; margin: 0; padding: 0; background-color: #f4f6f9; color: #222; }
+        header { background-color: #111111; color: white; padding: 30px 0; text-align: center; border-bottom: 5px solid #d32f2f; }
+        header h1 { margin: 0; font-size: 3em; letter-spacing: 2px; font-weight: 900; }
+        header p { color: #ccc; font-size: 1.1em; margin-top: 5px; }
         .nav { background-color: #ffffff; overflow: hidden; display: flex; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
-        .nav a { color: #333; text-align: center; padding: 18px 25px; text-decoration: none; font-weight: 700; font-size: 0.95em; text-transform: uppercase; transition: 0.2s; }
+        .nav a { color: #333; text-align: center; padding: 18px 25px; text-decoration: none; font-weight: bold; font-size: 1em; transition: 0.2s; }
         .nav a:hover { color: #d32f2f; background-color: #fcfcfc; }
         .container { max-width: 1150px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 2.4fr 1fr; gap: 35px; }
-        .card { background: white; padding: 0; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 30px; overflow: hidden; transition: 0.3s; border: 1px solid #eef2f6; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 30px; overflow: hidden; transition: 0.3s; border: 1px solid #eef2f6; }
         .card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
-        .thumbnail-wrapper { width: 100%; max-height: 280px; overflow: hidden; background-color: #eee; }
-        .news-img { width: 100%; height: 280px; object-fit: cover; transition: transform 0.5s ease; }
-        .card:hover .news-img { transform: scale(1.04); }
-        .card h2 { color: #111; margin: 0 0 12px 0; font-size: 1.7em; line-height: 1.3; font-weight: 800; }
+        .thumbnail-wrapper { width: 100%; max-height: 260px; overflow: hidden; }
+        .thumbnail-wrapper img { width: 100%; height: 260px; object-fit: cover; transition: transform 0.5s ease; }
+        .card:hover .thumbnail-wrapper img { transform: scale(1.03); }
+        .card-content { padding: 25px; }
+        .card h2 { color: #111; margin: 0 0 12px 0; font-size: 1.6em; line-height: 1.4; font-weight: 800; }
         .card h2 a { color: #111; text-decoration: none; transition: 0.2s; }
         .card h2 a:hover { color: #d32f2f; }
         .card p { line-height: 1.6; font-size: 1.05em; color: #555; margin-bottom: 20px; }
-        .date { color: #d32f2f; font-size: 0.85em; font-weight: 800; letter-spacing: 1px; display: block; margin-bottom: 10px; text-transform: uppercase; }
-        .card-content { padding: 25px; }
-        /* Adjust padding since layout has no inner container in string builder */
-        .card h2, .card p, .card .date, .card .read-btn { margin-left: 25px; margin-right: 25px; }
-        .card h2 { margin-top: 15px; }
-        .read-btn { display: inline-block; background-color: #111; color: white; padding: 10px 20px; text-decoration: none; font-weight: 700; font-size: 0.9em; border-radius: 6px; margin-bottom: 25px; transition: 0.2s; }
+        .date { color: #d32f2f; font-size: 0.85em; font-weight: 800; letter-spacing: 1px; display: block; margin-bottom: 10px; }
+        .read-btn { display: inline-block; background-color: #111; color: white; padding: 10px 20px; text-decoration: none; font-weight: bold; font-size: 0.9em; border-radius: 6px; transition: 0.2s; }
         .read-btn:hover { background-color: #d32f2f; }
         .sidebar .card { border-top: 4px solid #111; padding: 25px; }
         .sidebar h3 { margin-top: 0; color: #111; font-size: 1.3em; font-weight: 800; border-bottom: 2px solid #111; padding-bottom: 10px; }
         .sidebar ul { list-style-type: none; padding: 0; margin: 15px 0 0 0; }
-        .sidebar li { padding: 12px 0; border-bottom: 1px solid #edf2f7; font-size: 0.95em; line-weight: 1.4; font-weight: 600; color: #444; }
-        footer { background-color: #111; color: #999; text-align: center; padding: 25px 0; margin-top: 50px; font-size: 0.9em; }
+        .sidebar li { padding: 12px 0; border-bottom: 1px solid #edf2f7; font-size: 0.95em; font-weight: 600; color: #444; }
+        footer { background-color: #111; color: #999; text-align: center; padding: 25px 0; margin-top: 50px; }
         @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -41,15 +38,15 @@
 
 <header>
     <h1>NINT.CO.IN</h1>
-    <p>Live AI Automated News Feed • No Ads • Clean Experience</p>
+    <p>లైవ్ ఆటోమేటెడ్ తెలుగు వార్తలు • క్లీన్ రీడర్ ఎక్స్ పీరియన్స్</p>
 </header>
 
 <div class="nav">
-    <a href="#">Home</a>
-    <a href="#">Politics</a>
-    <a href="#">Business & Stocks</a>
-    <a href="#">Movies</a>
-    <a href="#">Sports</a>
+    <a href="#">హోమ్</a>
+    <a href="#">రాజకీయాలు</a>
+    <a href="#">వ్యాపారం & స్టాక్స్</a>
+    <a href="#">సినిమాలు</a>
+    <a href="#">క్రీడలు</a>
 </div>
 
 <div class="container">
@@ -57,62 +54,105 @@
         
             <div class="card">
                 <div class="thumbnail-wrapper">
-                    <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=600" alt="News Image" class="news-img">
+                    <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600" alt="NINT News">
                 </div>
-                <span class="date">STOCKS & BUSINESS • LIVE SYNC</span>
-                <h2><a href="https://www.livemint.com/market/stock-market-news/shankar-sharma-compares-nifty-50-vs-bank-fd-returns-over-12-years-the-results-may-surprise-you-11778920355519.html" target="_blank">Shankar Sharma compares Nifty 50 vs bank FD returns over 12 years — the results may surprise you</a></h2>
-                <p>Shankar Sharma's analysis reveals the Nifty 50 Total Return Index achieved a 9.38% post-tax CAGR over 12 years, while bank fixed deposits yielded 4.93%. Despite lower returns, bank FDs showed a superior risk-adjusted ret...</p>
-                <a href="https://www.livemint.com/market/stock-market-news/shankar-sharma-compares-nifty-50-vs-bank-fd-returns-over-12-years-the-results-may-surprise-you-11778920355519.html" target="_blank" class="read-btn">Read Full Story →</a>
+                <div class="card-content">
+                    <span class="date">దేశం - విదేశం (TOP STORIES) • లైవ్ అప్‌డేట్</span>
+                    <h2><a href="https://news.google.com/rss/articles/CBMi6wFBVV95cUxPakJEY2xTNHpaZjZPam5MRTNzeVN3Wl9Ud0ZCWW5YVW5OaUw3MWVYUkxqVTdER29RWHVZRlYzeGRGZ2FISlNyUnlnd0lHVHJYWEdHbzZ5M1BfMGpRd3JXc09mbndtLVhqN1RyZ1B4Z1VGUkVxRnFFU25IRXU0RWEzOHhBUGg1R3B1RkctOUZJeWdLTFZ2cDVpODJ5MnhPRi1QZjVlS1FBLWFxMkhJOUY5S21nVkNkMklIYjdEQnVKaGZwWGpqYzFCV09wZmpaLW9GRVNrVFVoU1lBRG9EcC1LZ0wwZUNLZ19xeWFF?oc=5" target="_blank">దారుణం.. ఇంటి అద్దె కట్టలేక భార్య, కుమార్తెపై అత్యాచారానికి అనుమతి..</a></h2>
+                    <p>దేశంలో జరుగుతున్న ఈ లేటెస్ట్ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి వివరాలు నెట్‌వర్క్ లో అందుబాటులో ఉన్నాయి......</p>
+                    <a href="https://news.google.com/rss/articles/CBMi6wFBVV95cUxPakJEY2xTNHpaZjZPam5MRTNzeVN3Wl9Ud0ZCWW5YVW5OaUw3MWVYUkxqVTdER29RWHVZRlYzeGRGZ2FISlNyUnlnd0lHVHJYWEdHbzZ5M1BfMGpRd3JXc09mbndtLVhqN1RyZ1B4Z1VGUkVxRnFFU25IRXU0RWEzOHhBUGg1R3B1RkctOUZJeWdLTFZ2cDVpODJ5MnhPRi1QZjVlS1FBLWFxMkhJOUY5S21nVkNkMklIYjdEQnVKaGZwWGpqYzFCV09wZmpaLW9GRVNrVFVoU1lBRG9EcC1LZ0wwZUNLZ19xeWFF?oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
+                </div>
             </div>
             
             <div class="card">
                 <div class="thumbnail-wrapper">
-                    <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=600" alt="News Image" class="news-img">
+                    <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600" alt="NINT News">
                 </div>
-                <span class="date">STOCKS & BUSINESS • LIVE SYNC</span>
-                <h2><a href="https://www.livemint.com/market/cryptocurrency/clarity-act-clears-key-senate-committee-hurdle-after-long-delay-here-s-how-the-crypto-industry-reacted-11778920079131.html" target="_blank">CLARITY Act clears key Senate committee hurdle after long delay — here’s how the crypto industry reacted</a></h2>
-                <p>The Senate Banking Committee advanced the Clarity Act, establishing the Commodity Futures Trading Commission as the primary crypto regulator.&amp;nbsp;...</p>
-                <a href="https://www.livemint.com/market/cryptocurrency/clarity-act-clears-key-senate-committee-hurdle-after-long-delay-here-s-how-the-crypto-industry-reacted-11778920079131.html" target="_blank" class="read-btn">Read Full Story →</a>
+                <div class="card-content">
+                    <span class="date">దేశం - విదేశం (TOP STORIES) • లైవ్ అప్‌డేట్</span>
+                    <h2><a href="https://news.google.com/rss/articles/CBMitAFBVV95cUxONVhDUk1taUJ3WVpnWXFjMGFPZHM0bHBsUzNtSWJaamFTWW4zUTRQc09sbU9qSnBvdzVsMzdhVDFIRmZKb2RjSGNYSUgyQ0c4VzV4b1ZweHZDcGxqOTRyWVFqQkpVaUN3MFE0SU4teXM0NjFTR2d5VWtfZ2lqQ1JTVV9SSE9OZWxhS2NYZmx3VDNSUTYyaHNrcm4wWWtJVkpxMjN6eENvMGhlMkExdXFoUXJKMXXSAboBQVVfeXFMTUlnbG1oQmtVRDJoSzRZc1VxQng0UW5tS1FqS0ltaXF0ZV85NDNSQ3hKb0dXOURqd1k3NUVJOWVJY3owYnQySldfeFlvVklhMFI1eHhLX0RWUG5TdmFwOWd4dGtUbUVSMjRFWlJIcjhjdTFWZmtjMGlGaHpvZG9BT3otR2ZKc3J0VFBwVXlvTGgwWW1HZXZwUVRTNnVBbHVuOUp4azZmTWR6R25QSGpnOXJUQ250R3ktTWV3?oc=5" target="_blank">Peddi Trailer: పెద్ది ట్రైలర్‌పై చిరంజీవి రివ్యూ... మెగా ట్వీటులో రామ్ చరణ్ డైలాగ్ లీక్</a></h2>
+                    <p>దేశంలో జరుగుతున్న ఈ లేటెస్ట్ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి వివరాలు నెట్‌వర్క్ లో అందుబాటులో ఉన్నాయి......</p>
+                    <a href="https://news.google.com/rss/articles/CBMitAFBVV95cUxONVhDUk1taUJ3WVpnWXFjMGFPZHM0bHBsUzNtSWJaamFTWW4zUTRQc09sbU9qSnBvdzVsMzdhVDFIRmZKb2RjSGNYSUgyQ0c4VzV4b1ZweHZDcGxqOTRyWVFqQkpVaUN3MFE0SU4teXM0NjFTR2d5VWtfZ2lqQ1JTVV9SSE9OZWxhS2NYZmx3VDNSUTYyaHNrcm4wWWtJVkpxMjN6eENvMGhlMkExdXFoUXJKMXXSAboBQVVfeXFMTUlnbG1oQmtVRDJoSzRZc1VxQng0UW5tS1FqS0ltaXF0ZV85NDNSQ3hKb0dXOURqd1k3NUVJOWVJY3owYnQySldfeFlvVklhMFI1eHhLX0RWUG5TdmFwOWd4dGtUbUVSMjRFWlJIcjhjdTFWZmtjMGlGaHpvZG9BT3otR2ZKc3J0VFBwVXlvTGgwWW1HZXZwUVRTNnVBbHVuOUp4azZmTWR6R25QSGpnOXJUQ250R3ktTWV3?oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
+                </div>
             </div>
             
             <div class="card">
                 <div class="thumbnail-wrapper">
-                    <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=600" alt="News Image" class="news-img">
+                    <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600" alt="NINT News">
                 </div>
-                <span class="date">STOCKS & BUSINESS • LIVE SYNC</span>
-                <h2><a href="https://www.livemint.com/market/stock-market-news/tcs-tata-elxsi-to-infosys-ofss-hcl-tech-top-it-stocks-announce-massive-dividends-in-q4fy26-despite-ai-led-headwinds-11778916906810.html" target="_blank">TCS to Infosys, OFSS: Top IT stocks announce massive dividends in Q4FY26 despite AI-led headwinds</a></h2>
-                <p>Despite mixed global demand, major Indian IT firms like TCS and Infosys continue to reward shareholders with dividends. This earnings season highlighted cash-rich companies committed to returning capital, with varied pay...</p>
-                <a href="https://www.livemint.com/market/stock-market-news/tcs-tata-elxsi-to-infosys-ofss-hcl-tech-top-it-stocks-announce-massive-dividends-in-q4fy26-despite-ai-led-headwinds-11778916906810.html" target="_blank" class="read-btn">Read Full Story →</a>
+                <div class="card-content">
+                    <span class="date">దేశం - విదేశం (TOP STORIES) • లైవ్ అప్‌డేట్</span>
+                    <h2><a href="https://news.google.com/rss/articles/CBMi6gFBVV95cUxQakNVMG92SktRTFdTR2dsalEtZmtySWpkVEVyS1c4Y25CaFUzYzVkcUV3Tm16U0xlQjdSMC1TN2xGQTd3blhCMHlaTk9BcDYtWkppUGZ2VGlPVDJ1U2xQaEtsYVJLZWxKOG1qelNJZ3p0U000LVoxZEtDX2VzRGtPYkYxOFBPbGNWVUFHbHRxd1hscUZiNHdQSzRzY3FiU0FPRHo1R2pjdGVDTTN1UGpRR2R0X09Sa2xqTkNzOUhMMmxLTmZndzFhaDEzVmItbTlVc2N3c01vX3EzZFdxd20xTVNoemdKb0JwUUE?oc=5" target="_blank">బండి సంజయ్ కు బిగ్ షాక్ ఇచ్చిన కవిత.. ప్రధాని మోదీకి లేఖ!</a></h2>
+                    <p>దేశంలో జరుగుతున్న ఈ లేటెస్ట్ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి వివరాలు నెట్‌వర్క్ లో అందుబాటులో ఉన్నాయి......</p>
+                    <a href="https://news.google.com/rss/articles/CBMi6gFBVV95cUxQakNVMG92SktRTFdTR2dsalEtZmtySWpkVEVyS1c4Y25CaFUzYzVkcUV3Tm16U0xlQjdSMC1TN2xGQTd3blhCMHlaTk9BcDYtWkppUGZ2VGlPVDJ1U2xQaEtsYVJLZWxKOG1qelNJZ3p0U000LVoxZEtDX2VzRGtPYkYxOFBPbGNWVUFHbHRxd1hscUZiNHdQSzRzY3FiU0FPRHo1R2pjdGVDTTN1UGpRR2R0X09Sa2xqTkNzOUhMMmxLTmZndzFhaDEzVmItbTlVc2N3c01vX3EzZFdxd20xTVNoemdKb0JwUUE?oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
+                </div>
             </div>
             
             <div class="card">
                 <div class="thumbnail-wrapper">
-                    <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=600" alt="News Image" class="news-img">
+                    <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600" alt="NINT News">
                 </div>
-                <span class="date">STOCKS & BUSINESS • LIVE SYNC</span>
-                <h2><a href="https://www.livemint.com/market/stock-market-news/expert-view-retail-investors-conviction-will-be-tested-if-crude-shock-derails-earnings-devang-mehta-11778846787933.html" target="_blank">Expert View | How can new investors navigate stock market volatility? Devang Mehta explains</a></h2>
-                <p>While short-term noise can create volatility inside the investor’s mind, it’s very important to stay the course and refrain from frequent churning and trading, advised Devang Mehta, CIO at Spark Capital Private Wealth....</p>
-                <a href="https://www.livemint.com/market/stock-market-news/expert-view-retail-investors-conviction-will-be-tested-if-crude-shock-derails-earnings-devang-mehta-11778846787933.html" target="_blank" class="read-btn">Read Full Story →</a>
+                <div class="card-content">
+                    <span class="date">దేశం - విదేశం (TOP STORIES) • లైవ్ అప్‌డేట్</span>
+                    <h2><a href="https://news.google.com/rss/articles/CBMinwFBVV95cUxOeHVNZTJLT0dPYlVjR2xCUFllVEFCTVZTYmtoclI4TTZmSEpKaW1td3ZBbktiWTBFTG5lcE5mX01uNGxEZWtxUEJhMEJEYjhzOFFZNGxMck5DS21xazhxMVdrV1JtbEtXVEUwQXBBQmNjTm5QUVdUOV9scHNiTjRnbzJFMEVTVjQwRXBNMExydmhkY1luMHY0d09iVjdSQ1k?oc=5" target="_blank">Army Chief Upendra Dwivedi: పాకిస్థాన్‌కు వార్నింగ్ ఇచ్చిన ఆర్మీ చీఫ్ ఉపేంద్ర ద్వివేది</a></h2>
+                    <p>దేశంలో జరుగుతున్న ఈ లేటెస్ట్ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి వివరాలు నెట్‌వర్క్ లో అందుబాటులో ఉన్నాయి......</p>
+                    <a href="https://news.google.com/rss/articles/CBMinwFBVV95cUxOeHVNZTJLT0dPYlVjR2xCUFllVEFCTVZTYmtoclI4TTZmSEpKaW1td3ZBbktiWTBFTG5lcE5mX01uNGxEZWtxUEJhMEJEYjhzOFFZNGxMck5DS21xazhxMVdrV1JtbEtXVEUwQXBBQmNjTm5QUVdUOV9scHNiTjRnbzJFMEVTVjQwRXBNMExydmhkY1luMHY0d09iVjdSQ1k?oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="thumbnail-wrapper">
+                    <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600" alt="NINT News">
+                </div>
+                <div class="card-content">
+                    <span class="date">దేశం - విదేశం (TOP STORIES) • లైవ్ అప్‌డేట్</span>
+                    <h2><a href="https://news.google.com/rss/articles/CBMixgJBVV95cUxQd09naGZhdjNZU2lmX3Z1bC1mMmJOT2Q5amo1aU45YWgyVllVajd1d1ZQaWd0Rl9jendYdGJZLXZZTjdUdFlnY0lwdndrUHBpbXVYajdxMlZfZXNBaUx6N2hsNGlvVGo4VjNPeldkVjFHOTNQQ2xsRU9sMkxKMGgyQlZCVktmV1NXVTZnVVMxM3p6dVNEYTJuYlpBVjEzRHhCcXNORk9qekQ3MFZYS1BMUk1xRm53UDZrbENPTlFFY3c5ZDN1Q0xEVlI2SmFYZnA1elhYQWdoTzhRdGdxRmZkX29zVjdwbWt6WXI0VGtjWDU4Y2NncUJiQUY3MFVNd2VUUzFQM1U4YWx0VnpLdzU1bXA0emoyaXFaT1gxQWszQVd3SmRValpmRV8xYk11LUxJZ2xDS2l1NHl2YjhWQUdFNDBBZ0h2dw?oc=5" target="_blank">రాయలసీమ నుంచే 5వ జనరేషన్ ఫైటర్ జెట్లు</a></h2>
+                    <p>దేశంలో జరుగుతున్న ఈ లేటెస్ట్ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి వివరాలు నెట్‌వర్క్ లో అందుబాటులో ఉన్నాయి......</p>
+                    <a href="https://news.google.com/rss/articles/CBMixgJBVV95cUxQd09naGZhdjNZU2lmX3Z1bC1mMmJOT2Q5amo1aU45YWgyVllVajd1d1ZQaWd0Rl9jendYdGJZLXZZTjdUdFlnY0lwdndrUHBpbXVYajdxMlZfZXNBaUx6N2hsNGlvVGo4VjNPeldkVjFHOTNQQ2xsRU9sMkxKMGgyQlZCVktmV1NXVTZnVVMxM3p6dVNEYTJuYlpBVjEzRHhCcXNORk9qekQ3MFZYS1BMUk1xRm53UDZrbENPTlFFY3c5ZDN1Q0xEVlI2SmFYZnA1elhYQWdoTzhRdGdxRmZkX29zVjdwbWt6WXI0VGtjWDU4Y2NncUJiQUY3MFVNd2VUUzFQM1U4YWx0VnpLdzU1bXA0emoyaXFaT1gxQWszQVd3SmRValpmRV8xYk11LUxJZ2xDS2l1NHl2YjhWQUdFNDBBZ0h2dw?oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="thumbnail-wrapper">
+                    <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600" alt="NINT News">
+                </div>
+                <div class="card-content">
+                    <span class="date">బిజినెస్ & స్టాక్స్ (BUSINESS) • లైవ్ అప్‌డేట్</span>
+                    <h2><a href="https://news.google.com/?fr_unfepa=1&oc=5" target="_blank">ఈ ఫీడ్ అందుబాటులో లేదు.</a></h2>
+                    <p>తాజా ముఖ్యాంశాల కోసం ...</p>
+                    <a href="https://news.google.com/?fr_unfepa=1&oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="thumbnail-wrapper">
+                    <img src="https://images.unsplash.com/photo-1478720143033-6a972678aa30?w=600" alt="NINT News">
+                </div>
+                <div class="card-content">
+                    <span class="date">సినిమా & స్పోర్ట్స్ (ENTERTAINMENT) • లైవ్ అప్‌డేట్</span>
+                    <h2><a href="https://news.google.com/?fr_unfepa=1&oc=5" target="_blank">ఈ ఫీడ్ అందుబాటులో లేదు.</a></h2>
+                    <p>తాజా ముఖ్యాంశాల కోసం ...</p>
+                    <a href="https://news.google.com/?fr_unfepa=1&oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
+                </div>
             </div>
             
     </div>
     
     <div class="sidebar">
         <div class="card">
-            <h3>Live Engine Network</h3>
+            <h3>లైవ్ సిస్టమ్ నెట్‌వర్క్</h3>
             <ul>
-                <li>• Sources: Hindustan Times, Livemint</li>
-                <li>• Automation Loop: Active</li>
-                <li>• Refresh Rate: Every 15 Minutes</li>
-                <li>• Clean Growth Phase: Active (No Ads)</li>
-                <li>• Total Feeds: 4 Active Stories</li>
+                <li>• మూలాలు: గూగుల్ న్యూస్ తెలుగు, ఈనాడు ఫీడ్స్</li>
+                <li>• ఆటోమేషన్ లూప్: యాక్టివ్</li>
+                <li>• రీఫ్రెష్ రేట్: బ్రేకింగ్ అప్‌డేట్స్</li>
+                <li>• ప్రస్తుత వార్తలు: 7 టాపిక్స్</li>
             </ul>
         </div>
     </div>
 </div>
 
 <footer>
-    <p>&copy; 2026 NINT Live News Engine. Premium Reader Mode.</p>
+    <p>&copy; 2026 NINT Live News Engine.</p>
 </footer>
 
 </body>
