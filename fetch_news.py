@@ -62,10 +62,8 @@ for category, url in feeds.items():
             elif category == "మార్కెట్":
                 img_url = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600"
 
-            # Clean single quotes in title for JavaScript safety
             safe_title = title.replace("'", "\\'")
 
-            # Build cards with separate action buttons
             new_articles_html += f"""
             <div class="news-card">
                 <img src="{img_url}" alt="NINT Local">
@@ -86,7 +84,6 @@ for category, url in feeds.items():
 # Combine: New News on Top + Old News at bottom
 combined_feeds = new_articles_html + old_feeds_content
 
-# Limit total history to top 45 cards
 all_cards = re.findall(r'<div class="news-card">.*?</div>\s*</div>\s*</div>', combined_feeds, re.DOTALL)
 if not all_cards:
     all_cards = re.findall(r'<div class="news-card">.*?</div>\s*</div>', combined_feeds, re.DOTALL)
@@ -117,16 +114,35 @@ full_html = f"""<!DOCTYPE html>
         .news-card h2 {{ color: #1c1e21; font-size: 1.35em; font-weight: 800; line-height: 1.4; margin-bottom: 12px; min-height: 2.8em; }}
         .news-card p {{ color: #4b5563; font-size: 1.02em; line-height: 1.6; margin-bottom: 20px; }}
         
-        /* Flexbox structure to keep buttons perfectly aligned */
         .card-actions {{ display: flex; gap: 12px; width: 100%; margin-top: auto; }}
         .read-more-btn {{ flex: 1; text-align: center; background-color: #1c1e21; color: white; padding: 12px 10px; text-decoration: none; font-weight: 700; font-size: 0.9em; border-radius: 8px; transition: 0.2s; }}
         .read-more-btn:hover {{ background-color: #dc2626; }}
         
-        /* Share Button Design */
         .share-btn {{ flex: 1; background-color: #25d366; color: white; border: none; padding: 12px 10px; font-weight: 700; font-size: 0.9em; border-radius: 8px; cursor: pointer; transition: 0.2s; }}
-        .share-btn:hover {{ background-color: #128c7e; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }}
+        .share-btn:hover {{ background-color: #128c7e; }}
         
-        footer {{ background-color: #18191a; color: #a0aab4; text-align: center; padding: 30px 0; margin-top: 60px; font-weight: bold; border-top: 5px solid #dc2626; }}
+        /* Premium Enterprise Corporate Footer & About */
+        footer {{ background-color: #18191a; color: #a0aab4; padding: 50px 0 30px 0; margin-top: 60px; border-top: 5px solid #dc2626; }}
+        .footer-container {{ display: grid; grid-template-columns: 2fr 1fr; gap: 40px; max-width: 1300px; margin: 0 auto; padding: 0 20px; text-align: left; }}
+        .footer-about h3, .footer-links h3 {{ color: #ffffff; font-size: 1.3em; margin-bottom: 15px; border-left: 4px solid #dc2626; padding-left: 12px; font-weight: bold; }}
+        .footer-about p {{ font-size: 1em; line-height: 1.7; color: #a0aab4; }}
+        .footer-links a {{ color: #a0aab4; text-decoration: none; font-weight: bold; font-size: 1em; display: inline-block; margin: 5px 0; transition: 0.2s; }}
+        .footer-links a:hover {{ color: #dc2626; }}
+        .copyright {{ text-align: center; margin-top: 40px; border-top: 1px solid #242526; padding-top: 25px; font-size: 0.95em; color: #64748b; font-weight: bold; }}
+        
+        /* High-End Popup Modals CSS */
+        .custom-modal {{ display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); padding-top: 100px; }}
+        .modal-content {{ background-color: #ffffff; color: #1c1e21; margin: auto; padding: 35px; border-radius: 16px; width: 85%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; animation: fadeIn 0.3s; }}
+        .modal-content h2 {{ font-size: 1.8em; margin-bottom: 15px; color: #0f172a; border-bottom: 3px solid #dc2626; padding-bottom: 8px; }}
+        .modal-content p {{ font-size: 1.05em; line-height: 1.7; color: #334155; }}
+        .close-modal {{ color: #64748b; float: right; font-size: 30px; font-weight: bold; cursor: pointer; line-height: 1; margin-top: -10px; }}
+        .close-modal:hover {{ color: #dc2626; }}
+        @keyframes fadeIn {{ from {{ opacity: 0; }} to {{ opacity: 1; }} }}
+        
+        @media (max-width: 768px) {{
+            .footer-container {{ grid-template-columns: 1fr; gap: 30px; }}
+            .news-grid {{ grid-template-columns: 1fr; }}
+        }}
     </style>
 </head>
 <body>
@@ -143,8 +159,35 @@ full_html = f"""<!DOCTYPE html>
 </div>
 
 <footer>
-    <p>&copy; 2026 NINT NEWS NETWORK • టోటల్ లైవ్ స్టోరీలు: {total_count}</p>
+    <div class="footer-container">
+        <div class="footer-about">
+            <h3>NINT NEWS గురించి</h3>
+            <p>NINT NEWS అనేది తెలంగాణ ప్రజల కోసం ప్రత్యేకంగా రూపొందించబడిన హైపర్-లోకల్ ఆటోమేటెడ్ వార్తా వేదిక. క్షణక్షణానికి తెలంగాణ జిల్లాలు, మండలాలు మరియు గ్రామాల్లో జరిగే రాజకీయాలు, క్రైమ్, రైతుల సమస్యలు మరియు మార్కెట్ రేట్లను సోది లేకుండా క్లీన్ బుల్లెట్ పాయింట్స్ రూపంలో నేరుగా అందిస్తుంది.</p>
+        </div>
+        <div class="footer-links">
+            <h3>లీగల్ పేజీలు</h3>
+            <a href="#" onclick="openModal('privacy'); return false;">🔒 Privacy Policy</a><br>
+            <a href="#" onclick="openModal('terms'); return false;">⚖️ Terms & Conditions</a>
+        </div>
+    </div>
+    <p class="copyright">&copy; 2026 NINT NEWS NETWORK • టోటల్ లైవ్ స్టోరీలు: {total_count}</p>
 </footer>
+
+<div id="privacyModal" class="custom-modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal('privacy')">&times;</span>
+        <h2>Privacy Policy</h2>
+        <p>NINT NEWS కు స్వాగతం. మా వెబ్‌సైట్ యూజర్ల వ్యక్తిగత సమాచారాన్ని లేదా బ్రౌజింగ్ హిస్టరీని సేకరించదు. మేము కేవలం పబ్లిక్ RSS ఫీడ్స్ ఆధారంగా ఆటోమేటెడ్ పద్ధతిలో వార్తలను బ్రీఫ్ చేసి అందిస్తాము. మా సైట్ లో ప్రదర్శించబడే థర్డ్-పార్టీ యాడ్స్ (Google AdSense) వారి సొంత పాలసీల ప్రకారం కుకీస్ ని ఉపయోగించవచ్చు.</p>
+    </div>
+</div>
+
+<div id="termsModal" class="custom-modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal('terms')">&times;</span>
+        <h2>Terms & Conditions</h2>
+        <p>NINT NEWS లోని సమాచారం అంతా ఆర్టిఫిషియల్ ఇంటెలిజెన్స్ (AI) మరియు RSS ఇంజిన్ల ద్వారా ఆటోమేటెడ్ పద్ధతిలో వివిధ ప్రచురణల నుండి సేకరించబడుతుంది. ఈ వార్తల యొక్క ప్రాథమిక ఖచ్చితత్వానికి ఒరిజినల్ పబ్లిషర్స్ మాత్రమే బాధ్యులు. యూజర్లు కేవలం సమాచార అవగాహన కొరకు మాత్రమే ఈ సైట్ ని ఉపయోగించవలెను.</p>
+    </div>
+</div>
 
 <script>
 function shareNews(title, link) {{
@@ -153,16 +196,24 @@ function shareNews(title, link) {{
         text: title + " \\n\\n👉 పూర్తి వివరాల కోసం NINT News చూడండి: \\n",
         url: link
     }};
-
-    // If mobile device allows native sharing (WhatsApp, Insta, FB list)
     if (navigator.share) {{
-        navigator.share(shareData)
-            .then(() => console.log('Successfully Shared!'))
-            .catch((error) => console.log('Error sharing:', error));
+        navigator.share(shareData).catch((error) => console.log('Error sharing:', error));
     }} else {{
-        // Desktop Fallback: Directly open WhatsApp Web with pre-filled text
         const whatsappUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(title + "\\n" + link);
         window.open(whatsappUrl, '_blank');
+    }}
+}}
+
+// Smooth Modal Controls Logic
+function openModal(type) {{
+    document.getElementById(type + 'Modal').style.display = 'block';
+}}
+function closeModal(type) {{
+    document.getElementById(type + 'Modal').style.display = 'none';
+}}
+window.onclick = function(event) {{
+    if (event.target.className === 'custom-modal') {{
+        event.target.style.display = 'none';
     }}
 }}
 </script>
@@ -172,5 +223,4 @@ function shareNews(title, link) {{
 
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(full_html)
-print("Successfully injected universal social sharing engine!")
-            
+print("Successfully injected universal social sharing, About section, and Legal Modals smoothly!")
