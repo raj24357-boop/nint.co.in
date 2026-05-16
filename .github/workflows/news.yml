@@ -2,20 +2,23 @@ name: 15-Minute News Auto Sync
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # Prathi 15 nimishalaki automatic ga run avthundi
-  workflow_dispatch: # Manam management kosam manual ga run cheyadaniki
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write  # Idi automatic ga write access ichi Exit Code 128 ni fix chestundi
 
 jobs:
   update-news:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4  # Node 20 warning povalante v4 use cheyali
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
-        python-python: '3.x'
+        python-version: '3.x'  # Typo fixed here
 
     - name: Install dependencies
       run: pip install requests beautifulsoup4
