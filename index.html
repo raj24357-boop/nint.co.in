@@ -1,10 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>NINT - Automated News Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NINT - Modern News Portal</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; color: #333; }
+        header { background-color: #1a1a1a; color: white; padding: 30px 0; text-align: center; }
+        header h1 { margin: 0; font-size: 2.8em; letter-spacing: 2px; text-transform: uppercase; }
+        header p { color: #ccc; font-size: 1.1em; }
+        .nav { background-color: #d32f2f; overflow: hidden; display: flex; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .nav a { color: white; text-align: center; padding: 15px 25px; text-decoration: none; font-weight: bold; transition: 0.3s; }
+        .nav a:hover { background-color: #b71c1c; }
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 2.5fr 1fr; gap: 30px; }
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid #d32f2f; }
+        .card h2 { color: #1a1a1a; margin-top: 0; font-size: 1.8em; }
+        .date { color: #777; font-size: 0.9em; margin-bottom: 15px; display: block; }
+        .sidebar .card { border-top: 4px solid #333; }
+        .sidebar h3 { margin-top: 0; color: #1a1a1a; }
+        .sidebar ul { list-style-type: none; padding: 0; }
+        .sidebar li { padding: 10px 0; border-bottom: 1px solid #eee; }
+        footer { background-color: #1a1a1a; color: white; text-align: center; padding: 20px 0; margin-top: 40px; }
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+    </style>
 </head>
-<body style="text-align: center; font-family: Arial, sans-serif; margin-top: 50px;">
-    <h1>Welcome to nint.co.in</h1>
-    <p>Our AI-powered website is currently under construction. Stay tuned!</p>
+<body>
+
+<header>
+    <h1>NINT.CO.IN</h1>
+    <p>Your Daily Dose of Automated Insights</p>
+</header>
+
+<div class="nav">
+    <a href="#">Home</a>
+    <a href="#">Tech & AI Updates</a>
+    <a href="#">Mystery & Facts</a>
+    <a href="#">Global News</a>
+</div>
+
+<div class="container">
+    <div class="main-content">
+        <div class="card">
+            <h2>Top Free AI Video Editing Tools You Must Try</h2>
+            <span class="date">Published: May 16, 2026</span>
+            <p><strong>AI ela work chesthadhi?</strong> Video editing prapancham lo AI ippudu pedda revolution theesukochindi. Gantalakoddi time patte editing panulanu AI tools ippudu nimishallo chesthunnayi.</p>
+            <p>Ikkada konni best free AI video editors unnai:</p>
+            <ul>
+                <li><strong>CapCut:</strong> Background removal mariyu auto-captions ki idi best.</li>
+                <li><strong>Clipchamp:</strong> Windows users ki inbuilt ga vache manchi AI editor.</li>
+                <li><strong>DaVinci Resolve:</strong> Idi koncham professional software, kani indulo AI tools (like voice isolation) chala powerful ga untayi.</li>
+            </ul>
+            <p>Inthaku mundu audio editing kosam <strong>Audacity</strong> lanti software vaadevallam, kani ippudu AI tho voice enhance cheyadam inka easy aipoyindi. Meeru YouTube kosam crime or horror stories cheyali anukunte, ee tools mee time ni chala save chesthayi!</p>
+        </div>
+    </div>
+    
+    <div class="sidebar">
+        <div class="card">
+            <h3>Trending Now</h3>
+            <ul>
+                <li>Top 5 AI Audio Tools</li>
+                <li>Latest Smartphone Leaks</li>
+                <li>Market & Business Updates</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2026 NINT News Portal. All rights reserved.</p>
+</footer>
+
 </body>
 </html>
