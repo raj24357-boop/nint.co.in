@@ -3,157 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NINT - లైవ్ తెలుగు న్యూస్ పోర్టల్</title>
+    <title>NINT - Premium Live Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', 'Segoe UI', sans-serif; margin: 0; padding: 0; background-color: #f4f6f9; color: #222; }
-        header { background-color: #111111; color: white; padding: 30px 0; text-align: center; border-bottom: 5px solid #d32f2f; }
-        header h1 { margin: 0; font-size: 3em; letter-spacing: 2px; font-weight: 900; }
-        header p { color: #ccc; font-size: 1.1em; margin-top: 5px; }
-        .nav { background-color: #ffffff; overflow: hidden; display: flex; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
-        .nav a { color: #333; text-align: center; padding: 18px 25px; text-decoration: none; font-weight: bold; font-size: 1em; transition: 0.2s; }
-        .nav a:hover { color: #d32f2f; background-color: #fcfcfc; }
-        .container { max-width: 1150px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 2.4fr 1fr; gap: 35px; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 30px; overflow: hidden; transition: 0.3s; border: 1px solid #eef2f6; }
-        .card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
-        .thumbnail-wrapper { width: 100%; max-height: 260px; overflow: hidden; }
-        .thumbnail-wrapper img { width: 100%; height: 260px; object-fit: cover; transition: transform 0.5s ease; }
-        .card:hover .thumbnail-wrapper img { transform: scale(1.03); }
-        .card-content { padding: 25px; }
-        .card h2 { color: #111; margin: 0 0 12px 0; font-size: 1.6em; line-height: 1.4; font-weight: 800; }
-        .card h2 a { color: #111; text-decoration: none; transition: 0.2s; }
-        .card h2 a:hover { color: #d32f2f; }
-        .card p { line-height: 1.6; font-size: 1.05em; color: #555; margin-bottom: 20px; }
-        .date { color: #d32f2f; font-size: 0.85em; font-weight: 800; letter-spacing: 1px; display: block; margin-bottom: 10px; }
-        .read-btn { display: inline-block; background-color: #111; color: white; padding: 10px 20px; text-decoration: none; font-weight: bold; font-size: 0.9em; border-radius: 6px; transition: 0.2s; }
-        .read-btn:hover { background-color: #d32f2f; }
-        .sidebar .card { border-top: 4px solid #111; padding: 25px; }
-        .sidebar h3 { margin-top: 0; color: #111; font-size: 1.3em; font-weight: 800; border-bottom: 2px solid #111; padding-bottom: 10px; }
-        .sidebar ul { list-style-type: none; padding: 0; margin: 15px 0 0 0; }
-        .sidebar li { padding: 12px 0; border-bottom: 1px solid #edf2f7; font-size: 0.95em; font-weight: 600; color: #444; }
-        footer { background-color: #111; color: #999; text-align: center; padding: 25px 0; margin-top: 50px; }
-        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: #0b0f19; color: #f3f4f6; padding-bottom: 50px; }
+        
+        /* Modern Premium Header */
+        header { background: linear-gradient(135deg, #111827, #1f2937); text-align: center; padding: 40px 20px; border-bottom: 4px solid #ef4444; }
+        header h1 { font-size: 3.5em; font-weight: 900; letter-spacing: 4px; color: #ffffff; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        header p { color: #9ca3af; font-size: 1.1em; margin-top: 8px; font-weight: 600; letter-spacing: 1px; }
+        
+        /* Futuristic Category Filter Pills */
+        .filter-navigation { display: flex; justify-content: center; gap: 12px; margin: 30px auto; max-width: 800px; padding: 0 20px; flex-wrap: wrap; }
+        .pill-btn { background-color: #1f2937; color: #9ca3af; border: 2px solid #374151; padding: 12px 24px; border-radius: 30px; font-weight: 800; cursor: pointer; font-size: 0.95em; transition: all 0.25s ease; text-transform: uppercase; }
+        .pill-btn:hover { background-color: #374151; color: #ffffff; }
+        .pill-btn.active-pill { background-color: #ef4444; color: #ffffff; border-color: #ef4444; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
+        
+        /* Layout Container */
+        .main-layout { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: grid; grid-template-columns: 2.5fr 1fr; gap: 35px; }
+        
+        /* Grid Cards Interface */
+        .news-feed { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        .news-card { background-color: #111827; border-radius: 16px; overflow: hidden; border: 1px solid #1f2937; display: flex; flex-direction: row; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .news-card:hover { transform: translateY(-5px); border-color: #4b5563; box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
+        
+        .thumbnail-box { width: 35%; position: relative; overflow: hidden; background-color: #1f2937; }
+        .thumbnail-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .news-card:hover .thumbnail-box img { transform: scale(1.05); }
+        
+        /* Badges */
+        .badge { position: absolute; top: 15px; left: 15px; padding: 6px 12px; border-radius: 6px; font-size: 0.75em; font-weight: 900; color: white; letter-spacing: 1px; }
+        .politics { background-color: #3b82f6; }
+        .business { background-color: #10b981; }
+        .movies { background-color: #8b5cf6; }
+        .sports { background-color: #f59e0b; }
+        
+        /* Content Body */
+        .news-body { width: 65%; padding: 25px; display: flex; flex-direction: column; justify-content: space-between; }
+        .news-body h2 { color: #ffffff; font-size: 1.45em; font-weight: 800; line-height: 1.4; margin-bottom: 12px; }
+        .summary-text { color: #9ca3af; font-size: 1.05em; line-height: 1.6; margin-bottom: 15px; font-weight: 500; }
+        
+        .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1f2937; padding-top: 15px; }
+        .live-pulse { font-size: 0.85em; font-weight: 900; color: #ef4444; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; }
+        .action-link { color: #ef4444; text-decoration: none; font-weight: 800; font-size: 0.95em; transition: 0.2s; }
+        .action-link:hover { color: #ffffff; }
+        
+        /* Sidebar Dynamic Widget */
+        .sidebar-panel { background-color: #111827; border-radius: 16px; padding: 25px; border: 1px solid #1f2937; height: fit-content; }
+        .sidebar-panel h3 { color: #ffffff; font-size: 1.25em; font-weight: 900; border-bottom: 2px solid #ef4444; padding-bottom: 10px; margin-bottom: 15px; }
+        .sidebar-panel ul { list-style: none; }
+        .sidebar-panel li { padding: 12px 0; border-bottom: 1px solid #1f2937; color: #9ca3af; font-size: 0.95em; font-weight: 600; }
+        
+        /* Active/Inactive state classes for SPA mechanism */
+        .news-card { display: flex !important; }
+        .news-card.hidden-card { display: none !important; }
+        
+        @media (max-width: 900px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .news-card { flex-direction: column; }
+            .thumbnail-box { width: 100%; height: 200px; }
+            .news-body { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
 <header>
     <h1>NINT.CO.IN</h1>
-    <p>లైవ్ ఆటోమేటెడ్ తెలుగు వార్తలు • క్లీన్ రీడర్ ఎక్స్ పీరియన్స్</p>
+    <p>⚡ FAST • CRISP • AUTOMATED TELEGU INSIGHTS</p>
 </header>
 
-<div class="nav">
-    <a href="#">హోమ్</a>
-    <a href="#">రాజకీయాలు</a>
-    <a href="#">వ్యాపారం & స్టాక్స్</a>
-    <a href="#">సినిమాలు</a>
-    <a href="#">క్రీడలు</a>
+<div class="filter-navigation">
+    <button class="pill-btn active-pill" onclick="filterCat('all')">🔥 అంతా ఒకేచోట</button>
+    <button class="pill-btn" onclick="filterCat('politics')">🏛️ రాజకీయాలు</button>
+    <button class="pill-btn" onclick="filterCat('business')">📈 బిజినెస్ & స్టాక్స్</button>
+    <button class="pill-btn" onclick="filterCat('movies')">🎬 సినిమా ముచ్చట్లు</button>
+    <button class="pill-btn" onclick="filterCat('sports')">🏆 క్రీడలు</button>
 </div>
 
-<div class="container">
-    <div class="main-content">
+<div class="main-layout">
+    <div class="news-feed" id="feed-container">
         
-            <div class="card">
-                <div class="thumbnail-wrapper">
-                    <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600" alt="NINT News">
+            <div class="news-card active-card" data-cat="politics">
+                <div class="thumbnail-box">
+                    <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT News">
+                    <span class="badge politics">POLITICS</span>
                 </div>
-                <div class="card-content">
-                    <span class="date">దేశం - విదేశం (TOP STORIES) • లైవ్ అప్‌డేట్</span>
-                    <h2><a href="https://news.google.com/rss/articles/CBMi6wFBVV95cUxPakJEY2xTNHpaZjZPam5MRTNzeVN3Wl9Ud0ZCWW5YVW5OaUw3MWVYUkxqVTdER29RWHVZRlYzeGRGZ2FISlNyUnlnd0lHVHJYWEdHbzZ5M1BfMGpRd3JXc09mbndtLVhqN1RyZ1B4Z1VGUkVxRnFFU25IRXU0RWEzOHhBUGg1R3B1RkctOUZJeWdLTFZ2cDVpODJ5MnhPRi1QZjVlS1FBLWFxMkhJOUY5S21nVkNkMklIYjdEQnVKaGZwWGpqYzFCV09wZmpaLW9GRVNrVFVoU1lBRG9EcC1LZ0wwZUNLZ19xeWFF?oc=5" target="_blank">దారుణం.. ఇంటి అద్దె కట్టలేక భార్య, కుమార్తెపై అత్యాచారానికి అనుమతి..</a></h2>
-                    <p>దేశంలో జరుగుతున్న ఈ లేటెస్ట్ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి వివరాలు నెట్‌వర్క్ లో అందుబాటులో ఉన్నాయి......</p>
-                    <a href="https://news.google.com/rss/articles/CBMi6wFBVV95cUxPakJEY2xTNHpaZjZPam5MRTNzeVN3Wl9Ud0ZCWW5YVW5OaUw3MWVYUkxqVTdER29RWHVZRlYzeGRGZ2FISlNyUnlnd0lHVHJYWEdHbzZ5M1BfMGpRd3JXc09mbndtLVhqN1RyZ1B4Z1VGUkVxRnFFU25IRXU0RWEzOHhBUGg1R3B1RkctOUZJeWdLTFZ2cDVpODJ5MnhPRi1QZjVlS1FBLWFxMkhJOUY5S21nVkNkMklIYjdEQnVKaGZwWGpqYzFCV09wZmpaLW9GRVNrVFVoU1lBRG9EcC1LZ0wwZUNLZ19xeWFF?oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="thumbnail-wrapper">
-                    <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600" alt="NINT News">
-                </div>
-                <div class="card-content">
-                    <span class="date">దేశం - విదేశం (TOP STORIES) • లైవ్ అప్‌డేట్</span>
-                    <h2><a href="https://news.google.com/rss/articles/CBMitAFBVV95cUxONVhDUk1taUJ3WVpnWXFjMGFPZHM0bHBsUzNtSWJaamFTWW4zUTRQc09sbU9qSnBvdzVsMzdhVDFIRmZKb2RjSGNYSUgyQ0c4VzV4b1ZweHZDcGxqOTRyWVFqQkpVaUN3MFE0SU4teXM0NjFTR2d5VWtfZ2lqQ1JTVV9SSE9OZWxhS2NYZmx3VDNSUTYyaHNrcm4wWWtJVkpxMjN6eENvMGhlMkExdXFoUXJKMXXSAboBQVVfeXFMTUlnbG1oQmtVRDJoSzRZc1VxQng0UW5tS1FqS0ltaXF0ZV85NDNSQ3hKb0dXOURqd1k3NUVJOWVJY3owYnQySldfeFlvVklhMFI1eHhLX0RWUG5TdmFwOWd4dGtUbUVSMjRFWlJIcjhjdTFWZmtjMGlGaHpvZG9BT3otR2ZKc3J0VFBwVXlvTGgwWW1HZXZwUVRTNnVBbHVuOUp4azZmTWR6R25QSGpnOXJUQ250R3ktTWV3?oc=5" target="_blank">Peddi Trailer: పెద్ది ట్రైలర్‌పై చిరంజీవి రివ్యూ... మెగా ట్వీటులో రామ్ చరణ్ డైలాగ్ లీక్</a></h2>
-                    <p>దేశంలో జరుగుతున్న ఈ లేటెస్ట్ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి వివరాలు నెట్‌వర్క్ లో అందుబాటులో ఉన్నాయి......</p>
-                    <a href="https://news.google.com/rss/articles/CBMitAFBVV95cUxONVhDUk1taUJ3WVpnWXFjMGFPZHM0bHBsUzNtSWJaamFTWW4zUTRQc09sbU9qSnBvdzVsMzdhVDFIRmZKb2RjSGNYSUgyQ0c4VzV4b1ZweHZDcGxqOTRyWVFqQkpVaUN3MFE0SU4teXM0NjFTR2d5VWtfZ2lqQ1JTVV9SSE9OZWxhS2NYZmx3VDNSUTYyaHNrcm4wWWtJVkpxMjN6eENvMGhlMkExdXFoUXJKMXXSAboBQVVfeXFMTUlnbG1oQmtVRDJoSzRZc1VxQng0UW5tS1FqS0ltaXF0ZV85NDNSQ3hKb0dXOURqd1k3NUVJOWVJY3owYnQySldfeFlvVklhMFI1eHhLX0RWUG5TdmFwOWd4dGtUbUVSMjRFWlJIcjhjdTFWZmtjMGlGaHpvZG9BT3otR2ZKc3J0VFBwVXlvTGgwWW1HZXZwUVRTNnVBbHVuOUp4azZmTWR6R25QSGpnOXJUQ250R3ktTWV3?oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
+                <div class="news-body">
+                    <h2>బండి సంజయ్ కు బిగ్ షాక్ ఇచ్చిన కవిత.. ప్రధాని మోదీకి లేఖ!</h2>
+                    <p class="summary-text">⚡ దేశంలో సంచలనం సృష్టిస్తున్న ఈ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి లైవ్ అప్‌డేట్స్ మరియు విశ్లేషణ నెట్‌వర్క్ లో అందుబాటులోకి వచ్చాయి....</p>
+                    <div class="card-footer">
+                        <span class="live-pulse">🔴 LIVE</span>
+                        <a href="https://news.google.com/rss/articles/CBMi6gFBVV95cUxQakNVMG92SktRTFdTR2dsalEtZmtySWpkVEVyS1c4Y25CaFUzYzVkcUV3Tm16U0xlQjdSMC1TN2xGQTd3blhCMHlaTk9BcDYtWkppUGZ2VGlPVDJ1U2xQaEtsYVJLZWxKOG1qelNJZ3p0U000LVoxZEtDX2VzRGtPYkYxOFBPbGNWVUFHbHRxd1hscUZiNHdQSzRzY3FiU0FPRHo1R2pjdGVDTTN1UGpRR2R0X09Sa2xqTkNzOUhMMmxLTmZndzFhaDEzVmItbTlVc2N3c01vX3EzZFdxd20xTVNoemdKb0JwUUE?oc=5" target="_blank" class="action-link">పూర్తిగా చదవండి →</a>
+                    </div>
                 </div>
             </div>
             
-            <div class="card">
-                <div class="thumbnail-wrapper">
-                    <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600" alt="NINT News">
+            <div class="news-card active-card" data-cat="politics">
+                <div class="thumbnail-box">
+                    <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT News">
+                    <span class="badge politics">POLITICS</span>
                 </div>
-                <div class="card-content">
-                    <span class="date">దేశం - విదేశం (TOP STORIES) • లైవ్ అప్‌డేట్</span>
-                    <h2><a href="https://news.google.com/rss/articles/CBMi6gFBVV95cUxQakNVMG92SktRTFdTR2dsalEtZmtySWpkVEVyS1c4Y25CaFUzYzVkcUV3Tm16U0xlQjdSMC1TN2xGQTd3blhCMHlaTk9BcDYtWkppUGZ2VGlPVDJ1U2xQaEtsYVJLZWxKOG1qelNJZ3p0U000LVoxZEtDX2VzRGtPYkYxOFBPbGNWVUFHbHRxd1hscUZiNHdQSzRzY3FiU0FPRHo1R2pjdGVDTTN1UGpRR2R0X09Sa2xqTkNzOUhMMmxLTmZndzFhaDEzVmItbTlVc2N3c01vX3EzZFdxd20xTVNoemdKb0JwUUE?oc=5" target="_blank">బండి సంజయ్ కు బిగ్ షాక్ ఇచ్చిన కవిత.. ప్రధాని మోదీకి లేఖ!</a></h2>
-                    <p>దేశంలో జరుగుతున్న ఈ లేటెస్ట్ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి వివరాలు నెట్‌వర్క్ లో అందుబాటులో ఉన్నాయి......</p>
-                    <a href="https://news.google.com/rss/articles/CBMi6gFBVV95cUxQakNVMG92SktRTFdTR2dsalEtZmtySWpkVEVyS1c4Y25CaFUzYzVkcUV3Tm16U0xlQjdSMC1TN2xGQTd3blhCMHlaTk9BcDYtWkppUGZ2VGlPVDJ1U2xQaEtsYVJLZWxKOG1qelNJZ3p0U000LVoxZEtDX2VzRGtPYkYxOFBPbGNWVUFHbHRxd1hscUZiNHdQSzRzY3FiU0FPRHo1R2pjdGVDTTN1UGpRR2R0X09Sa2xqTkNzOUhMMmxLTmZndzFhaDEzVmItbTlVc2N3c01vX3EzZFdxd20xTVNoemdKb0JwUUE?oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="thumbnail-wrapper">
-                    <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600" alt="NINT News">
-                </div>
-                <div class="card-content">
-                    <span class="date">దేశం - విదేశం (TOP STORIES) • లైవ్ అప్‌డేట్</span>
-                    <h2><a href="https://news.google.com/rss/articles/CBMinwFBVV95cUxOeHVNZTJLT0dPYlVjR2xCUFllVEFCTVZTYmtoclI4TTZmSEpKaW1td3ZBbktiWTBFTG5lcE5mX01uNGxEZWtxUEJhMEJEYjhzOFFZNGxMck5DS21xazhxMVdrV1JtbEtXVEUwQXBBQmNjTm5QUVdUOV9scHNiTjRnbzJFMEVTVjQwRXBNMExydmhkY1luMHY0d09iVjdSQ1k?oc=5" target="_blank">Army Chief Upendra Dwivedi: పాకిస్థాన్‌కు వార్నింగ్ ఇచ్చిన ఆర్మీ చీఫ్ ఉపేంద్ర ద్వివేది</a></h2>
-                    <p>దేశంలో జరుగుతున్న ఈ లేటెస్ట్ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి వివరాలు నెట్‌వర్క్ లో అందుబాటులో ఉన్నాయి......</p>
-                    <a href="https://news.google.com/rss/articles/CBMinwFBVV95cUxOeHVNZTJLT0dPYlVjR2xCUFllVEFCTVZTYmtoclI4TTZmSEpKaW1td3ZBbktiWTBFTG5lcE5mX01uNGxEZWtxUEJhMEJEYjhzOFFZNGxMck5DS21xazhxMVdrV1JtbEtXVEUwQXBBQmNjTm5QUVdUOV9scHNiTjRnbzJFMEVTVjQwRXBNMExydmhkY1luMHY0d09iVjdSQ1k?oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
+                <div class="news-body">
+                    <h2>వాళ్లది ఫ్యాక్షన్‌.. మనది ఫైటర్‌ జెట్‌</h2>
+                    <p class="summary-text">⚡ దేశంలో సంచలనం సృష్టిస్తున్న ఈ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి లైవ్ అప్‌డేట్స్ మరియు విశ్లేషణ నెట్‌వర్క్ లో అందుబాటులోకి వచ్చాయి....</p>
+                    <div class="card-footer">
+                        <span class="live-pulse">🔴 LIVE</span>
+                        <a href="https://news.google.com/rss/articles/CBMigAJBVV95cUxQRF9IZXhWQ3p2ZWlFSVNEZHgwYVVrVk1aUkFWUHB6MlpyZGg0VDNfSm5UazVuV0sya1l3OWNQUHgwaXdJYXdwYTVhYVVmOFpMQTJ6ei1yWi14QktKalc2M0lmSnI0amdfbzU1b1BsSk5GaVBUb0h2TnlLN3Z5UlE0bGxjdGlBRm1CT2ZFbjFzVHVuenJoNVBXTE1JeVBCS2ZSWDExYjJ4Ujc5UHBZSlhQZXA3WEZNazRiWUJjb1Q3cnNsM25OYVR4S1pzNlZWc25uTm8zaHVHUVpseHJBQjR4UnFqblBaWDZDSTJsRU92eUtsczZCZ1VEeDhuM2xjcHhS?oc=5" target="_blank" class="action-link">పూర్తిగా చదవండి →</a>
+                    </div>
                 </div>
             </div>
             
-            <div class="card">
-                <div class="thumbnail-wrapper">
-                    <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600" alt="NINT News">
+            <div class="news-card active-card" data-cat="politics">
+                <div class="thumbnail-box">
+                    <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT News">
+                    <span class="badge politics">POLITICS</span>
                 </div>
-                <div class="card-content">
-                    <span class="date">దేశం - విదేశం (TOP STORIES) • లైవ్ అప్‌డేట్</span>
-                    <h2><a href="https://news.google.com/rss/articles/CBMixgJBVV95cUxQd09naGZhdjNZU2lmX3Z1bC1mMmJOT2Q5amo1aU45YWgyVllVajd1d1ZQaWd0Rl9jendYdGJZLXZZTjdUdFlnY0lwdndrUHBpbXVYajdxMlZfZXNBaUx6N2hsNGlvVGo4VjNPeldkVjFHOTNQQ2xsRU9sMkxKMGgyQlZCVktmV1NXVTZnVVMxM3p6dVNEYTJuYlpBVjEzRHhCcXNORk9qekQ3MFZYS1BMUk1xRm53UDZrbENPTlFFY3c5ZDN1Q0xEVlI2SmFYZnA1elhYQWdoTzhRdGdxRmZkX29zVjdwbWt6WXI0VGtjWDU4Y2NncUJiQUY3MFVNd2VUUzFQM1U4YWx0VnpLdzU1bXA0emoyaXFaT1gxQWszQVd3SmRValpmRV8xYk11LUxJZ2xDS2l1NHl2YjhWQUdFNDBBZ0h2dw?oc=5" target="_blank">రాయలసీమ నుంచే 5వ జనరేషన్ ఫైటర్ జెట్లు</a></h2>
-                    <p>దేశంలో జరుగుతున్న ఈ లేటెస్ట్ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి వివరాలు నెట్‌వర్క్ లో అందుబాటులో ఉన్నాయి......</p>
-                    <a href="https://news.google.com/rss/articles/CBMixgJBVV95cUxQd09naGZhdjNZU2lmX3Z1bC1mMmJOT2Q5amo1aU45YWgyVllVajd1d1ZQaWd0Rl9jendYdGJZLXZZTjdUdFlnY0lwdndrUHBpbXVYajdxMlZfZXNBaUx6N2hsNGlvVGo4VjNPeldkVjFHOTNQQ2xsRU9sMkxKMGgyQlZCVktmV1NXVTZnVVMxM3p6dVNEYTJuYlpBVjEzRHhCcXNORk9qekQ3MFZYS1BMUk1xRm53UDZrbENPTlFFY3c5ZDN1Q0xEVlI2SmFYZnA1elhYQWdoTzhRdGdxRmZkX29zVjdwbWt6WXI0VGtjWDU4Y2NncUJiQUY3MFVNd2VUUzFQM1U4YWx0VnpLdzU1bXA0emoyaXFaT1gxQWszQVd3SmRValpmRV8xYk11LUxJZ2xDS2l1NHl2YjhWQUdFNDBBZ0h2dw?oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
+                <div class="news-body">
+                    <h2>కాకినాడ జిల్లాలో ఘోర రోడ్డు ప్రమాదం... స్పాట్‌లోనే నలుగురు దుర్మరణం</h2>
+                    <p class="summary-text">⚡ దేశంలో సంచలనం సృష్టిస్తున్న ఈ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి లైవ్ అప్‌డేట్స్ మరియు విశ్లేషణ నెట్‌వర్క్ లో అందుబాటులోకి వచ్చాయి....</p>
+                    <div class="card-footer">
+                        <span class="live-pulse">🔴 LIVE</span>
+                        <a href="https://news.google.com/rss/articles/CBMipwFBVV95cUxQU00tRUhEV282bDIteFVSSjk5UzUxLUF3Unplcld3aElONWw1OTlnd2N1VU9JVnR6ZnZqRFJxZm8wdUxwTktIcGdwNENKMk9SYWpQV1E1blRld2xuUmtTYl9yT1h4SmRZQWRiUzZ5WGxsQXpjMFQ3WnRBX1VVNlJybWNXeUpONGlvNWlodlVZLVlubnN4Ym5KcmpYbnZrWU5IUWxDcTktc9IBrAFBVV95cUxQcWFYQTlid2Y1WkRJUzdDc0lxUVNBNksyQ3doRkw1VHI2RHd3blVRQ1hKT1ZjRWhsVm9YV2JJSkFBOGFNUUxsOFpacTRQOVphZFptQVdyekdrUFRXWF9JV1M3QkcwLUJtLS1FbHgtc1p6R2pISHhnaDFxVUVmMURmWkpRcS1vNkptZWZNRVlYRGtRaUxlcWJTYkZGNmxVNXk0NHVrem5LT2g2aHVv?oc=5" target="_blank" class="action-link">పూర్తిగా చదవండి →</a>
+                    </div>
                 </div>
             </div>
             
-            <div class="card">
-                <div class="thumbnail-wrapper">
+            <div class="news-card active-card" data-cat="politics">
+                <div class="thumbnail-box">
+                    <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT News">
+                    <span class="badge politics">POLITICS</span>
+                </div>
+                <div class="news-body">
+                    <h2>YS Jagan: సంపద సృష్టి కాదు.. సంక్షోభ సృష్టి</h2>
+                    <p class="summary-text">⚡ దేశంలో సంచలనం సృష్టిస్తున్న ఈ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి లైవ్ అప్‌డేట్స్ మరియు విశ్లేషణ నెట్‌వర్క్ లో అందుబాటులోకి వచ్చాయి....</p>
+                    <div class="card-footer">
+                        <span class="live-pulse">🔴 LIVE</span>
+                        <a href="https://news.google.com/rss/articles/CBMiygFBVV95cUxPX1FmQ3BGcmxRQTRaSkRHUGxiTUU5anFXMWo0QllDN1VqR3Q0SkxwUFB5UUpiajhubHFhakRDNjZwYmFtNDFpMUlNSEE3Q3d5ZG9IdGZjbjBBQnVMZGFwODJiQnhKVVBmekV5YndSY2RKS0FFWG1kZTdQdVVBV2hHX3BPTjE4ODRJb2M1Z0xUUVVUaWQxanp6V19TOEtsZVFhOEZwSmdsNndLQll3VThEb0tJdUVBY3JWT0ZJd3JiRlBWQWw5NVQzdktn0gHPAUFVX3lxTE1uN0h4dm1HdFhnOFkyX0JISGR5Y29lV29jUGhBdU5vSkJPSlNUVndBd2tfWmVFZmVXQUVuOWtaU05qZ3g5MWZIMXJKM0JkeUozUnAzNnJjZ2pMcW1JcmRyUWRJbWJPWEZCeTdMNXRtaG9JOFN6M0R2ckNBSW5abVdDTlNrNUQ2bXJFa0NTbnFNd2xYT19VZi1EQVRSM3FPbV9NUTVWMEZSa3JnWUdTVjVwMUpGZXVYWUh3Rm9Oa1pRdnUwWFA2TUNlQ09aVVpGNA?oc=5" target="_blank" class="action-link">పూర్తిగా చదవండి →</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="news-card active-card" data-cat="politics">
+                <div class="thumbnail-box">
+                    <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT News">
+                    <span class="badge politics">POLITICS</span>
+                </div>
+                <div class="news-body">
+                    <h2>Petrol Diesel Prices: పెట్రోల్, డీజిల్ వినియోగదారులకు బిగ్ షాక్.. మరోసారి భారీగా పెరగనున్న ధరలు</h2>
+                    <p class="summary-text">⚡ దేశంలో సంచలనం సృష్టిస్తున్న ఈ ట్రెండింగ్ టాపిక్ కి సంబంధించిన పూర్తి లైవ్ అప్‌డేట్స్ మరియు విశ్లేషణ నెట్‌వర్క్ లో అందుబాటులోకి వచ్చాయి....</p>
+                    <div class="card-footer">
+                        <span class="live-pulse">🔴 LIVE</span>
+                        <a href="https://news.google.com/rss/articles/CBMigwJBVV95cUxNaGRXaHpnWUlQQ2tTVlpiYkJYUzh5eXpiTnlUTEJJM21QNG9oamR0anpTaGRQekg2UWhRdWViVHZzb0hvTFMwemdkdXFRdXV3NmFFY1FTRTBiMDJiYU1UYURMeEJqQUJ5Z3l3azExdEZkRmY1QzRGVU5SQWtGS0lFdkFENERET0ZmNzQ3Y2g2bklpb3dJS2NmMDd2SGdRR3pHaW1BenYtdGg5RW5JbENrbjZkX29pRTZZZy1GT29xNXdQTUZ3cDRPV0JMb2x5cWZYYXlhN3J2VlhPdGxudk1CRUxxMGsyU0tOMjN6NkRFV3JTaHRhLWlNczZvZjZpQXJLbWFF?oc=5" target="_blank" class="action-link">పూర్తిగా చదవండి →</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="news-card active-card" data-cat="business">
+                <div class="thumbnail-box">
                     <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600" alt="NINT News">
+                    <span class="badge business">BUSINESS</span>
                 </div>
-                <div class="card-content">
-                    <span class="date">బిజినెస్ & స్టాక్స్ (BUSINESS) • లైవ్ అప్‌డేట్</span>
-                    <h2><a href="https://news.google.com/?fr_unfepa=1&oc=5" target="_blank">ఈ ఫీడ్ అందుబాటులో లేదు.</a></h2>
-                    <p>తాజా ముఖ్యాంశాల కోసం ...</p>
-                    <a href="https://news.google.com/?fr_unfepa=1&oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
+                <div class="news-body">
+                    <h2>ఈ ఫీడ్ అందుబాటులో లేదు.</h2>
+                    <p class="summary-text">⚡ తాజా ముఖ్యాంశాల కోసం ...</p>
+                    <div class="card-footer">
+                        <span class="live-pulse">🔴 LIVE</span>
+                        <a href="https://news.google.com/?fr_unfepa=1&oc=5" target="_blank" class="action-link">పూర్తిగా చదవండి →</a>
+                    </div>
                 </div>
             </div>
             
-            <div class="card">
-                <div class="thumbnail-wrapper">
+            <div class="news-card active-card" data-cat="movies">
+                <div class="thumbnail-box">
                     <img src="https://images.unsplash.com/photo-1478720143033-6a972678aa30?w=600" alt="NINT News">
+                    <span class="badge movies">MOVIES</span>
                 </div>
-                <div class="card-content">
-                    <span class="date">సినిమా & స్పోర్ట్స్ (ENTERTAINMENT) • లైవ్ అప్‌డేట్</span>
-                    <h2><a href="https://news.google.com/?fr_unfepa=1&oc=5" target="_blank">ఈ ఫీడ్ అందుబాటులో లేదు.</a></h2>
-                    <p>తాజా ముఖ్యాంశాల కోసం ...</p>
-                    <a href="https://news.google.com/?fr_unfepa=1&oc=5" target="_blank" class="read-btn">పూర్తిగా చదవండి →</a>
+                <div class="news-body">
+                    <h2>ఈ ఫీడ్ అందుబాటులో లేదు.</h2>
+                    <p class="summary-text">⚡ తాజా ముఖ్యాంశాల కోసం ...</p>
+                    <div class="card-footer">
+                        <span class="live-pulse">🔴 LIVE</span>
+                        <a href="https://news.google.com/?fr_unfepa=1&oc=5" target="_blank" class="action-link">పూర్తిగా చదవండి →</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="news-card active-card" data-cat="sports">
+                <div class="thumbnail-box">
+                    <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600" alt="NINT News">
+                    <span class="badge sports">SPORTS</span>
+                </div>
+                <div class="news-body">
+                    <h2>ఈ ఫీడ్ అందుబాటులో లేదు.</h2>
+                    <p class="summary-text">⚡ తాజా ముఖ్యాంశాల కోసం ...</p>
+                    <div class="card-footer">
+                        <span class="live-pulse">🔴 LIVE</span>
+                        <a href="https://news.google.com/?fr_unfepa=1&oc=5" target="_blank" class="action-link">పూర్తిగా చదవండి →</a>
+                    </div>
                 </div>
             </div>
             
     </div>
     
-    <div class="sidebar">
-        <div class="card">
-            <h3>లైవ్ సిస్టమ్ నెట్‌వర్క్</h3>
-            <ul>
-                <li>• మూలాలు: గూగుల్ న్యూస్ తెలుగు, ఈనాడు ఫీడ్స్</li>
-                <li>• ఆటోమేషన్ లూప్: యాక్టివ్</li>
-                <li>• రీఫ్రెష్ రేట్: బ్రేకింగ్ అప్‌డేట్స్</li>
-                <li>• ప్రస్తుత వార్తలు: 7 టాపిక్స్</li>
-            </ul>
-        </div>
+    <div class="sidebar-panel">
+        <h3>⚡ లైవ్ ఆటోమేషన్ ఇంజిన్</h3>
+        <ul>
+            <li>• అప్‌డేట్ ఫ్రీక్వెన్సీ: సూపర్ ఫాస్ట్</li>
+            <li>• యాడ్స్ స్థితి: 100% క్లీన్ (No Ads)</li>
+            <li>• స్మార్ట్ ఫిల్టర్స్: యాక్టివ్</li>
+            <li>• లోడింగ్ స్పీడ్: 0.2 సెకన్లు</li>
+            <li>• మొత్తం లైవ్ స్టోరీలు: 8 ఫీడ్స్</li>
+        </ul>
     </div>
 </div>
 
-<footer>
-    <p>&copy; 2026 NINT Live News Engine.</p>
-</footer>
+<script>
+function filterCat(cat) {
+    // Update active pill styling
+    const buttons = document.querySelectorAll('.pill-btn');
+    buttons.forEach(btn => btn.classList.remove('active-pill'));
+    event.currentTarget.classList.add('active-pill');
+    
+    // Smooth SPA filter animation logic
+    const cards = document.querySelectorAll('.news-card');
+    cards.forEach(card => {
+        if(cat === 'all' || card.getAttribute('data-cat') === cat) {
+            card.classList.remove('hidden-card');
+        } else {
+            card.classList.add('hidden-card');
+        }
+    });
+}
+</script>
 
 </body>
 </html>
