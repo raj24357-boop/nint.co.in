@@ -1,8 +1,8 @@
-name: 15-Minute News Auto Sync
+name: 5-Minute News Auto Sync
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
