@@ -1,0 +1,32 @@
+name: 15-Minute News Auto Sync
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # Prathi 15 nimishalaki automatic ga run avthundi
+  workflow_dispatch: # Manam management kosam manual ga run cheyadaniki
+
+jobs:
+  update-news:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-python: '3.x'
+
+    - name: Install dependencies
+      run: pip install requests beautifulsoup4
+
+    - name: Run News Scraper Agent
+      run: python fetch_news.py
+
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name "AI-News-Agent"
+        git config --global user.email "agent@nint.co.in"
+        git add index.html
+        git commit -m "Automated 15-Min News Sync with Images" || exit 0
+        git push
