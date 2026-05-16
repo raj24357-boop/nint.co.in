@@ -3,224 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NINT - తెలంగాణ లైవ్ న్యూస్ పోర్టల్</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>NINT - తెలంగాణ హైపర్-లోకల్ లైవ్ ఫీడ్</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;700;900&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Noto Sans Telugu', 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; line-height: 1.5; }
+        body { font-family: 'Noto Sans Telugu', 'Inter', sans-serif; background-color: #f0f2f5; color: #1c1e21; line-height: 1.5; }
         
-        /* Corporate Slate Header */
-        header { background-color: #0f172a; color: white; padding: 25px 20px; text-align: center; border-bottom: 4px solid #dc2626; }
-        header h1 { font-size: 2.8em; font-weight: 900; letter-spacing: 2px; color: #ffffff; }
-        header p { color: #94a3b8; font-size: 1.1em; margin-top: 5px; font-weight: bold; }
+        /* Premium Enterprise Slate Header */
+        header { background: linear-gradient(135deg, #18191a, #242526); text-align: center; padding: 40px 20px; border-bottom: 5px solid #dc2626; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        header h1 { font-size: 3.5em; font-weight: 900; letter-spacing: 3px; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        header p { color: #a0aab4; font-size: 1.1em; margin-top: 8px; font-weight: bold; letter-spacing: 1px; }
         
-        .container { max-width: 1250px; margin: 30px auto; padding: 0 20px; }
+        .container { max-width: 1300px; margin: 40px auto; padding: 0 20px; }
         
-        /* Massive Highlight Headline Section */
-        .breaking-hero-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 40px; }
-        .hero-card { position: relative; border-radius: 14px; overflow: hidden; height: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
-        .hero-card img { width: 100%; height: 100%; object-fit: cover; }
-        .hero-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(15,23,42,0.95), rgba(15,23,42,0.4), transparent); padding: 30px; color: white; }
-        .hero-overlay h2 { font-size: 1.8em; font-weight: 900; line-height: 1.4; margin: 10px 0; }
-        .hero-overlay h2 a { color: white; text-decoration: none; }
-        .hero-overlay p { color: #cbd5e1; font-size: 1.05em; margin-bottom: 15px; }
-        .location-badge { background-color: #dc2626; color: white; padding: 5px 12px; border-radius: 6px; font-size: 0.85em; font-weight: bold; display: inline-block; }
+        /* Futuristic Category Labels Bar */
+        .section-nav { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; }
+        .cat-pill { background-color: #ffffff; color: #4b5563; border: 2px solid #e5e7eb; padding: 12px 24px; border-radius: 30px; font-weight: bold; font-size: 1em; cursor: pointer; transition: 0.2s; }
+        .cat-pill.active { background-color: #dc2626; color: #ffffff; border-color: #dc2626; box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3); }
         
-        .tg-btn { display: inline-block; background-color: white; color: #0f172a; padding: 8px 18px; text-decoration: none; font-weight: bold; border-radius: 6px; font-size: 0.9em; }
+        /* Grid Layout */
+        .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+        .news-card { background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; transition: all 0.3s ease; display: flex; flex-direction: column; }
+        .news-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: #d1d5db; }
         
-        /* Category Navigation Bar */
-        .section-title { font-size: 1.6em; font-weight: 900; color: #0f172a; margin-bottom: 20px; padding-left: 10px; border-left: 5px solid #dc2626; text-transform: uppercase; }
+        .news-card img { width: 100%; height: 200px; object-fit: cover; transition: 0.5s; }
+        .news-card:hover img { transform: scale(1.02); }
         
-        /* Professional Compact Grid Grid Layout */
-        .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
-        .news-grid-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: 0.3s; }
-        .news-grid-card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -3px rgba(0,0,0,0.1); }
-        .news-grid-card img { width: 100%; height: 180px; object-fit: cover; }
+        .news-body { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .news-meta { font-size: 0.85em; color: #dc2626; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
         
-        .grid-card-body { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; }
-        .grid-meta { font-size: 0.8em; color: #64748b; font-weight: bold; margin-bottom: 8px; display: block; }
-        .cat-tag { color: #dc2626; }
-        .news-grid-card h3 { font-size: 1.2em; font-weight: 800; color: #0f172a; line-height: 1.4; margin-bottom: 10px; }
-        .news-grid-card h3 a { color: #0f172a; text-decoration: none; }
-        .news-grid-card h3 a:hover { color: #dc2626; }
-        .news-grid-card p { color: #475569; font-size: 0.95em; line-height: 1.5; }
+        .news-card h2 { color: #1c1e21; font-size: 1.5em; font-weight: 800; line-height: 1.35; margin-bottom: 12px; }
+        .news-card h2 a { color: #1c1e21; text-decoration: none; transition: 0.2s; }
+        .news-card h2 a:hover { color: #dc2626; }
         
-        footer { background-color: #0f172a; color: #94a3b8; text-align: center; padding: 25px 0; margin-top: 60px; font-weight: bold; border-top: 4px solid #dc2626; }
+        .news-card p { color: #4b5563; font-size: 1.05em; line-height: 1.6; margin-bottom: 20px; }
         
-        @media (max-width: 850px) {
-            .breaking-hero-container { grid-template-columns: 1fr; }
-            .hero-card { height: 350px; }
-            .hero-overlay h2 { font-size: 1.4em; }
+        .read-more-btn { display: inline-block; background-color: #1c1e21; color: white; padding: 10px 20px; text-decoration: none; font-weight: 700; font-size: 0.9em; border-radius: 8px; transition: 0.2s; align-self: flex-start; }
+        .read-more-btn:hover { background-color: #dc2626; }
+        
+        footer { background-color: #18191a; color: #a0aab4; text-align: center; padding: 30px 0; margin-top: 60px; font-weight: bold; border-top: 5px solid #dc2626; }
+        
+        @media (max-width: 600px) {
+            header h1 { font-size: 2.2em; }
+            .news-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>NINT NEWS NETWORK</h1>
-    <p>తెలంగాణ హైపర్-లోకల్ ఆటోమేటెడ్ న్యూస్ డ్యాష్‌బోర్డ్</p>
+    <h1>NINT NEWS</h1>
+    <p>⚡ తెలంగాణ హైపర్-లోకల్ ఆటోమేటెడ్ న్యూస్ డ్యాష్‌బోర్డ్</p>
 </header>
 
 <div class="container">
-    <div class="section-title">🔥 ముఖ్యమైన వార్తలు (Top Highlights)</div>
-    <div class="breaking-hero-container">
-        
-                <div class="hero-card">
-                    <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600" alt="NINT Live">
-                    <div class="hero-overlay">
-                        <span class="location-badge">📍 తెలంగాణ • 16-05-2026</span>
-                        <h2><a href="https://news.google.com/rss/articles/CBMiswFBVV95cUxPQW5YME5FMUFKUGdVc21CUENBajdPWExQWUY3VUFsd3dNV3U3a0NJbkNib1dMMGdnbURGU0k4VW5WUXBBR1U2aTVOUnAyR2VXcVRVMC1ydjM4cHR1amRuWGZhR0pZOHNPWVFnNXo3UU1hb2swZTRvc2JYbnowTkt5bF83X2tWUHJRYVlkQ0xUTGp3M1k4TTItbjNRTmZVNVEtd1JEOGJHbmhsWXB1OWFsTmZzTQ?oc=5" target="_blank">కాళేశ్వరంపై కాంగ్రెస్‌ డ్రామాలు.. ఎమ్మెల్సీ తకెళ్లపల్లి</a></h2>
-                        <p>...</p>
-                        <a href="https://news.google.com/rss/articles/CBMiswFBVV95cUxPQW5YME5FMUFKUGdVc21CUENBajdPWExQWUY3VUFsd3dNV3U3a0NJbkNib1dMMGdnbURGU0k4VW5WUXBBR1U2aTVOUnAyR2VXcVRVMC1ydjM4cHR1amRuWGZhR0pZOHNPWVFnNXo3UU1hb2swZTRvc2JYbnowTkt5bF83X2tWUHJRYVlkQ0xUTGp3M1k4TTItbjNRTmZVNVEtd1JEOGJHbmhsWXB1OWFsTmZzTQ?oc=5" target="_blank" class="tg-btn">ఇప్పుడే చదవండి →</a>
-                    </div>
-                </div>
-                
-                <div class="hero-card">
-                    <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600" alt="NINT Live">
-                    <div class="hero-overlay">
-                        <span class="location-badge">📍 తెలంగాణ • 16-05-2026</span>
-                        <h2><a href="https://news.google.com/rss/articles/CBMi4gFBVV95cUxNclM5RzBRU2prWkVBYUJfVTJPcHpZSFZ0bGNseFU0ajF1UV9LOWJ5ZTdWTWV5dHY5eGYtVUw3M1hBUkVyS1lMZk9iSHBwTGk3alFhTk84eVpTV21XQlZ3c0JOaWpBdEV2c1BVeGNyeWozR2pJbVBiNmVNZVhqbnZ6RGF5V0ZZMHN5aVRDbTcxZktBcTh0aXQ3YllKQ2hoVUlMa1V0T2txQ1VqVzBwZFRuZk1QOE9qNW1CZW9ST2dYeVAzZlFhcVYtQW4zTkZjd1RVZFBLdklNVXVUZ0x3NHNMaU9n?oc=5" target="_blank">సర్‌ ప్రక్రియలో అక్రమాలకు అవకాశం ఇవ్వొద్దు..!</a></h2>
-                        <p>...</p>
-                        <a href="https://news.google.com/rss/articles/CBMi4gFBVV95cUxNclM5RzBRU2prWkVBYUJfVTJPcHpZSFZ0bGNseFU0ajF1UV9LOWJ5ZTdWTWV5dHY5eGYtVUw3M1hBUkVyS1lMZk9iSHBwTGk3alFhTk84eVpTV21XQlZ3c0JOaWpBdEV2c1BVeGNyeWozR2pJbVBiNmVNZVhqbnZ6RGF5V0ZZMHN5aVRDbTcxZktBcTh0aXQ3YllKQ2hoVUlMa1V0T2txQ1VqVzBwZFRuZk1QOE9qNW1CZW9ST2dYeVAzZlFhcVYtQW4zTkZjd1RVZFBLdklNVXVUZ0x3NHNMaU9n?oc=5" target="_blank" class="tg-btn">ఇప్పుడే చదవండి →</a>
-                    </div>
-                </div>
-                
+    <div class="section-nav">
+        <button class="cat-pill active">🔥 అంతా ఒకేచోట</button>
+        <button class="cat-pill">🏛️ రాజకీయాలు</button>
+        <button class="cat-pill">📍 జిల్లా వార్తలు</button>
+        <button class="cat-pill">🚜 క్రైమ్ & రైతు</button>
+        <button class="cat-pill">📈 మార్కెట్ రేట్లు</button>
     </div>
 
-    <div class="section-title">📰 తాజా సమాచారం (Latest Local Updates)</div>
     <div class="news-grid">
         
-                <div class="news-grid-card" data-cat="రాజకీయాలు">
-                    <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 తెలంగాణ | 16-05-2026 | <span class="cat-tag">రాజకీయాలు</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMitgFBVV95cUxNM2FVYVk0S1hhV3F3V3c3U0xQUmRkQ2owVThGaHV0UUxlN3lFWkJaMl9GWnpmVWNHM1hUeDgtdS1VOWxYX1Z4LTNfdTA4Z3pSd2JvYTg3bWE4U3FWdGNHb2VjRDk0amFQRUpkWWxaUmVLVEFXNE1ZbF9yaFMtSVlCWHUtOFgyajl0RmZJa25sSnBva0FKaDFZclJKQ2l0QlEzZ1FLYmRaTnl2anpBNnAtVk41QTFCZ9IBtgFBVV95cUxNM2FVYVk0S1hhV3F3V3c3U0xQUmRkQ2owVThGaHV0UUxlN3lFWkJaMl9GWnpmVWNHM1hUeDgtdS1VOWxYX1Z4LTNfdTA4Z3pSd2JvYTg3bWE4U3FWdGNHb2VjRDk0amFQRUpkWWxaUmVLVEFXNE1ZbF9yaFMtSVlCWHUtOFgyajl0RmZJa25sSnBva0FKaDFZclJKQ2l0QlEzZ1FLYmRaTnl2anpBNnAtVk41QTFCZw?oc=5" target="_blank">Congress: ఎస్‌ఐఆర్‌ హడావిడిగా చేయాల్సిన అవసరం లేదు: మహేశ్‌గౌడ్‌</a></h3>
-                        <p>...</p>
-                    </div>
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>CM Revanth Reddy : BRS ఒక చచ్చిపోయిన శవం.. దానికి భవిష్యత్తు లేదు</h2>
+                    <p>CM Revanth Reddy : BRS ఒక చచ్చిపోయిన శవం.. దానికి భవిష్యత్తు లేదు...</p>
+                    <a href="https://news.google.com/rss/articles/CBMirgFBVV95cUxOaXN2Vl9qMjdqZ1VRVEJyWXQ1MWVSMUQ3dl9rNDdCdnFoakFoZU5uYlVnM1kxQUgwVGZneUNia042YTVwYW1KSGlyY0pDWW1seU56ME80SWpDOWY2OEowaFZaMXpnZnBWcW4zaG1WcnRpQzM0Z1o1RGVIVFh0TnZzSWt4ZUY2aUFjRGlTWjBhVzRTVXFZbVhycnNQdVExd2VXVENnRllBN3RsaGhCNHfSAbMBQVVfeXFMTkJhTU1oeU5SX09JbGVqUXFZSG1DSlQzTWhoYWRlTnBmNW9fbFdvbFI4aENmdTJaZDc5MGprTVpuUVc2OHhseC1rM1lFOWtPczJtTjkwWGlTU0dPWU5oeDNSNmxQQVRUQmNDdEZ1YmJSZ3I3ZGVLMTRxc3JoOFRSVjdFdjE0VnNWVGgyLXdfZkNSUE5INVhpSmNWVG9OZEdTMDQ1aFBseEdMYi0wZklycG5Oa2M?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="రాజకీయాలు">
-                    <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 తెలంగాణ | 16-05-2026 | <span class="cat-tag">రాజకీయాలు</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMivwFBVV95cUxPNVpheDFvd05la2prOTlrZDRyNkdFak9CcVVncHFWQi1UUkVoZ01wa3hBT2xXeHVyaWRyLTZCUi1vUG9wRUNscG55aGlyaFlsZW9WNkFia3NuSG5TYU1iS2tHR2tCeWtfWjBKUlJwWWRBcUFXZ19JZDNkZlBaYmRMbE81bTdDbzdvcllhQ3BpTVVCYWh2N3VNT2hSNDROWnJvempCaUwyT2FiN3FHY20wOWFZd0ZCYnBiUDRQanVJZ9IBvwFBVV95cUxPNVpheDFvd05la2prOTlrZDRyNkdFak9CcVVncHFWQi1UUkVoZ01wa3hBT2xXeHVyaWRyLTZCUi1vUG9wRUNscG55aGlyaFlsZW9WNkFia3NuSG5TYU1iS2tHR2tCeWtfWjBKUlJwWWRBcUFXZ19JZDNkZlBaYmRMbE81bTdDbzdvcllhQ3BpTVVCYWh2N3VNT2hSNDROWnJvempCaUwyT2FiN3FHY20wOWFZd0ZCYnBiUDRQanVJZw?oc=5" target="_blank">Telangana Congress: కాంగ్రెస్‌లో పదవుల చిచ్చు..! సీనియర్లు ఎందుకు రగిలిపోతున్నారు? వారి ఆవేదనకు రీజన్ ఏంటి?</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>కవిత కొత్త పార్టీపై బీఆర్ఎస్ ఘాటు సెటైర్..!</h2>
+                    <p>కవిత కొత్త పార్టీపై బీఆర్ఎస్ ఘాటు సెటైర్..!...</p>
+                    <a href="https://news.google.com/rss/articles/CBMirAFBVV95cUxNT2FfUVR4ZVR4aWVfbVp4YmsyVFJIVnNaNlAwZEZmOXl0V2pEUG5SbnVsRVZ0Tk8tQVhYZnduQlNqbXJzMnZnQVpqM1ltUFRFdGd1SjNQcUNFTUwyTjZVSEgtSUQ3VGhJNzlFMFlDUC1yeFF1MDhQaGtXOHlDR2VzeUdjQVQyU3BsOVBHUTNpM2VJVk9wWnlMVFdLcVZTLTV5aXpEaXEwcXB1Q2Zl0gGsAUFVX3lxTE1PYV9RVHhlVHhpZV9tWnhiazJUUkhWc1o2UDBkRmY5eXRXakRQblJudWxFVnROTy1BWFhmd25CU2ptcnMydmdBWmozWW1QVEV0Z3VKM1BxQ0VNTDJONlVISC1JRDdUaEk3OUUwWUNQLXJ4UXUwOFBoa1c4eUNHZXN5R2NBVDJTcGw5UEdRM2kzZUlWT3BaeUxUV0txVlMtNXlpekRpcTBxcHVDZmU?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="జిల్లా వార్తలు">
-                    <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 వరంగల్ | 16-05-2026 | <span class="cat-tag">జిల్లా వార్తలు</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMirAFBVV95cUxQT1BDZC1mckRZcWMxbDFuNkRkRWc3QmN2UzY0OE1hTTY3Tk5Bc1hWSGZkNkVQTnZCTmZwMHloNko0WV9oVUZTNXhMNEdjMERfajVINWZRMGxOSDdoNmpYSmNQcVNkT0NHYTJCVm40LVpvVDQ2VUxjSHlWeWtIX25oQi1KTTJnVHVpVS1ncENhSUc5djVxaWE0c215Z2RudjlTc0JjMTJLdlhEcV9D0gGyAUFVX3lxTE9Xa19vV1pCaUQyd2dKWHZrbUg1T2d5bktybTVOTWJfOHFpbVBHX19LdHJBcVN3aUk4XzRhNV9QRm1uSFc5N0lhOVlNRTlZTU02cmRWd1c3RXYzc3VyNUp3M0dOaHhOUUpFVmdfMFJ2NEI2U25qbWd2Q1V2TE9jSjlTZTVCS0loYmIta1RYWVdoanZ0ZVdpeERDTV91WGFFRnlVakRobG1qb2tkSmVyMlFNbUE?oc=5" target="_blank">Telangana Second airport: ఓరుగల్లు వాసులకు గుడ్ న్యూస్.. అదిరిపోయే ఫీచర్లతో వరంగల్ విమానాశ్రయం!</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>Telangana Congress: గులాబీ కోటలపై కాంగ్రెస్ పంజా.. రేవంత్ రెడ్డి వ్యూహం ఫలించేనా?</h2>
+                    <p>Telangana Congress: గులాబీ కోటలపై కాంగ్రెస్ పంజా.. రేవంత్ రెడ్డి వ్యూహం ఫలించేనా?...</p>
+                    <a href="https://news.google.com/rss/articles/CBMikgFBVV95cUxQa0Ffd1NCS3MyaUdhalNZX29DdWJxSmphUEpWOHpRb0tMSnhZN1FKVks5NHlXa1NDLThnYUFfYnZiaVZBWnlGMUpTTzh3azdrTk44WjZuUXBZNmhZRW5nSEVNVGRhVHYzeGNkc0VaaS15T1J5T3RtQWtWZk1mNGFjelNrQmZZM3JRZmZYbWZtUFpiQdIBlwFBVV95cUxPa3RXaE1sM2c3T2ZtcndtOXpFRDJPczdDUkd2d1BqV0lkTGJ0M1VYRWtBM1BXQnI3MThuRm5mckpEcjlid3NKWWhURVU0QUEyMmhleFA4aFg0aGlOR3hxUU9XMlBuS3B5cUxfeFBoX3N5U1RTM19KRXdMeFlmTnZGdTlBNGlsVkpVYnJKSTFoTzNBRVpUcVVJ?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="జిల్లా వార్తలు">
-                    <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 జయశంకర్ భూపాలపల్లి | 16-05-2026 | <span class="cat-tag">జిల్లా వార్తలు</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMiyAFBVV95cUxNX0lIeEZSY0p6NHloSXR4aHNEVmFFSEM4QlZEWXk2aWg0UC1GUkxuMW5KV2xvX1EwbmRNYjIzSlp1SnNKb1Vha3d4akJNYnZPR2pkM0RCeldHWVBRUXZWZ25BWWRqMFp1Vm55UXExdVZodllvVmNrNGZ4WnNJZy1vXzR3N09VQS1ZMVhFbzEzVFJ1bm9kd3cyTVMwOFpxLXNLUFVUcEw4aTg1cW90ZGRRaWZLZHh1YU1GbHo1UGp6Vk5mc2dmTVctSNIBzgFBVV95cUxNaGRiRWx5Y2ttVVNVa0swdDlBNDVyOXRFcl9fTTFtQjlzYjJHeUVvRFFCUkFLUHN3X1V4S01acVF1U0JDU2tTbmduTjNlTmFicXdfTEU3SnhTcjIxbzdiWDNRU1dINFlpUE8wTXF2ZUthMU8tcjlHa3RNT1dxeDhPUGltSkU4eXFoV1J3R21LWmpTLXRqMDhqdGd5TnVsLVRfdVVpdXNFN1pVWlJDc0VyeE84di1LSTNJem1wMmF1Y2NXamUxZS1nVDNsRkRyQQ?oc=5" target="_blank">Weather Update : తెలుగు ప్రజలారా తస్మాత్ జాగ్రత్త.. ఈ జిల్లాల్లో యూపీ తరహా ఈదురుగాలులు, అల్లకల్లోలమే</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>కాంగ్రెస్ రాజకీయ కుట్రలు బట్టబయలు.. చివరకు న్యాయమే గెలిచింది: హైకోర్టు తీర్పుపై హరీశ్ రావు</h2>
+                    <p>కాంగ్రెస్ రాజకీయ కుట్రలు బట్టబయలు.. చివరకు న్యాయమే గెలిచింది: హైకోర్టు తీర్పుపై హరీశ్ రావు...</p>
+                    <a href="https://news.google.com/rss/articles/CBMisgFBVV95cUxOYUVuZGRCQkNSVmVTWnY3eVQ2TkpfakRqTF9USWcwOWZ5bWZzVFhUUnA4WE5YeE1fdmdVYW15X2I4c0VrakZrNWxYeUM5b0Z2TGxMNTMtM01rYW8zeVZVWlQ1LXJ0SnZjRkRnTFJOeUQ5Z0NpWG9oMXNaRzhzTnJYQXFJcE50aHp0Ylh2NXF6dktNdXlRcnFPMHhsVk4tUXNRNGoxZTEzVGpzQng4Qi1yQ1Jn0gG3AUFVX3lxTE1lMWhFQ1g3UGYtdzVNdTFXOWE1WGFYNmxGSHp0dXJjQWlnT3h3MDF4MlVQV3Q3cFd5T3phV05nMVBBTTZuU04xQ3kySTUtbWdtVjJyWUduc01VYnFELWhUbExvaUlMdThuZlVBYkFvTkxhOFN6a3E1YXgxZ1BIUllrRUV4MlplclVKTDB2ZmdRQ01WVUZvN1Y2OGwxMjU5WUtQZWRQY3VCZTRfMDVMR0tDbkdaam5YWQ?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="జిల్లా వార్తలు">
-                    <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 జయశంకర్ భూపాలపల్లి | 16-05-2026 | <span class="cat-tag">జిల్లా వార్తలు</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMiwAFBVV95cUxQdFdHNEtfNS1KSWZrRGc4SVliZmhTNldoZG1Hdm4tdUVvRGFKX2lHU3JIVEZjanVEalg2Z2FiR0ZIak9VUHdCdTE3OWpLRXZuUEpwWjM4b3RlMUhkQUxST1lYLUVxQ0tpeXp6Wm9BS0NVSUpjT2VlTEt6RjJDS1V0X05PYVNIM1NJWDNCVzhNZW1odFdOU3F6RHhiaHVBS3VkUmcwR2M4TWNRVnJDN3JwMkZpc2pQS1ZjdjlMeUxlbnnSAcABQVVfeXFMUHRXRzRLXzUtSklma0RnOElZYmZoUzZXaGRtR3ZuLXVFb0RhSl9pR1NySFRGY2p1RGpYNmdhYkdGSGpPVVB3QnUxNzlqS0V2blBKcFozOG90ZTFIZEFMUk9ZWC1FcUNLaXl6elpvQUtDVUlKY09lZUxLekYyQ0tVdF9OT2FTSDNTSVgzQlc4TWVtaHRXTlNxekR4Ymh1QUt1ZFJnMEdjOE1jUVZyQzdycDJGaXNqUEtWY3Y5THlMZW55?oc=5" target="_blank">Karimnagar : బీటెక్ విద్యార్థిని ప్రతిభ.. బైక్ యాక్సిడెంట్‌లో తండ్రికి గాయాలు.. సేప్టీ కిట్ రూపకల్పన చేసిన కుమార్తె.. కేంద్రం నుంచి రూ.12లక్షలు!</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>BRS Election Strategy: టార్గెట్ మున్సిపోల్స్.. బీఆర్ఎస్ ప్రత్యేక కార్యాచరణ..</h2>
+                    <p>BRS Election Strategy: టార్గెట్ మున్సిపోల్స్.. బీఆర్ఎస్ ప్రత్యేక కార్యాచరణ.....</p>
+                    <a href="https://news.google.com/rss/articles/CBMivAFBVV95cUxPTERWS19OMFdYdnZDVFpCZU0zSm0xX2xfbGRNWWh2aHQ4RXR2YlBFTGNTOHl1Mk5vRS1jeU5nTHpCbU1yOElYYURFVW9xVmp2dzk1aDh1YUk2UlNrZThaZzJkWWVGTWRrbHF3bXJtVXBVZlZvTnEwejNPN1pQMmpiMkJxakJqb1ZhLVc1TnowbWJsaFZBUUh4Uk5kajQ3QmdSanJjdEsxUl9BOUwtV1RDVFlpVDFnT0hxUHlBbg?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="జిల్లా వార్తలు">
-                    <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 జయశంకర్ భూపాలపల్లి | 16-05-2026 | <span class="cat-tag">జిల్లా వార్తలు</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMiyAFBVV95cUxObDNLUU16RkJBLUk4Rkg1eUtSVExsN1FwRG1WY3d0NkVRTVlhb0E5WUxpbGtCUEdwME9YOFJkZGVIOUtQeHJfQy1CbDd3YjFUR055Z2N4eEY0VkJxOWd6ZjU2MzdVWS1xaG5kdEctMEZOTTE2NVg2Ukx5clVSNTU4RVRhR3lWaEl1WWdfa3FtTlpfTzZ5ZWd4U1ZoQm5ZdkZac3J6NUMzazVaNFdzaExGZXZRa294SkNSVHZPenZ4aUxVdnFhUEh4VtIBzgFBVV95cUxOMFp3aXIxbXJNdUJFTzZwSjl6Vi1fYnE0WVRzZVdVQ2luR0tCcU9ORExHMXBOTlpaejZsa0RpaExZTExqTFBiazJhZ1J5YXJDOHBjODNia0lyRGVKT0I3ZG03d053RzdYMlRia1J2NlloTklxRDU1d2x0QnpFRXl5dWhwcFI0WUhYQm52bi1fZ0VtNWJPYlAtTGtRdENHcGdqNUJ2SFVWUUx6WkpZR3FLVTktQVlXYjIzeGdxN0VQLTVPc0c5RVJpcUt6U2VFZw?oc=5" target="_blank">Bandi Bhageerath: బండి భగీరథ్‌కు తెలంగాణ హైకోర్టు షాక్! ముందస్తు బెయిల్ ఇచ్చేందుకు నిరాకరణ!</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>రైతులకు గుడ్‌న్యూస్.. ఇక దళారుల టెన్షన్ లేదు, అందుబాటులోకి లోకల్ మార్కెట్లు</h2>
+                    <p>రైతులకు గుడ్‌న్యూస్.. ఇక దళారుల టెన్షన్ లేదు, అందుబాటులోకి లోకల్ మార్కెట్లు...</p>
+                    <a href="https://news.google.com/rss/articles/CBMi9wFBVV95cUxON1Y3SHdseS1nNHZiX1I3QTN6a05NaEJ1aEg0RVlvRlJsQUxXaUZIOGxGWWFvWm51WFJTR1hXTWx1LUJxWkdWV3VFXy1hR0tZMExxTFBWYm5Ia3NrYTZfTkEtRGxoMDBwT3JacmxKNW1Yam9MVFFWTGE1ckVpNW1wUHFGTUVUbkV2LS1vSmhmMVBtcGp3Zk55dVBINXE3Y1FpNU9aYUh3RXVnNURCUWg4X2l2eWtUTi1QYUM2QTFsQ0FqNlpNT2hQV1M4ZmxFTUh0TmlaXzVrTy1FNE1vN3JQOGczU3Y5WFNTVWFzOGdzV2hVMnZLdFhz0gH8AUFVX3lxTE8tTkQ3WUk3ZG8yeFN0QVJyYXNnaFpGenB2TkE0dHdhcjZhWUNqVHhUNDEtRlQyZl9rUUxQcmZ1ZVFZNGxWZDJURlRrZkE0SWRDcEJwaVNxNmx4a1l6NHppVzZHdWtES0tCblYzNVFZamVVSVJ1S2MtWTY1V3lRQ0M0QzR2bDExRmRaTV9vaWVvTmRkeXItRThYZnZCZk0xVjA5S0lxVFFNQVc5UGxVWEd4MVJhR2g4bFRDelcweFdPQUNocjVXWERfR2ZmTGp6RFc3NFFhQ3VvVXpCRm5PQ0haVFZhdkJSa1hDVVQ1VEJCWmY3SlJRaWRBWWFwcQ?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="రైతు లోకం & క్రైమ్">
-                    <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 తెలంగాణ | 16-05-2026 | <span class="cat-tag">రైతు లోకం & క్రైమ్</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMiqgFBVV95cUxQQlh5dUtncEctbTBBLTUyaEJreVBpZ18xeHBsejJZM1IxUWZfNS1SZTNKYkR1VlNpdDhxZEZmRmhCa05YQ0xLd0M0RGxUV0NQSllSLVlMdklXUTZlUXJWNm5DUTVJcHdvQjhCWEFLZ1BpWDh5UVJYanhxNHRiNHBkTG54bmVEbHp1ajJSSWNJTEpGSXlzSXUtVGwzMHRHOHF3RVN2TzMteXVUUdIBrwFBVV95cUxOMkEwYjdubFhnak82ZzJVbng1T1Nib09uLVBhNy1KbXJzWFl5c2V4UGFTbGpzQmJWdTU0N2Y1bXdxSFp2TGp0WlcwN1RjTjNmdVl0aGtMbS1JUVlsU1VySkZBNEJwSkI3ODVYMk1Xb1ZCWVJmNjZCQ3VyLUFmQXhHRXVxU1I5WlB1UjRXSm9md250MlRiTzZOTnh2Mi10OURTcV9vTWJfR29nV0htanlR?oc=5" target="_blank">Telangana Farmers: దయనీయంగా తెలంగాణ రైతుల పరిస్థితి.. మహేశ్వర్ రెడ్డి</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>పార్టీ బలోపేతమే లక్ష్యంగా కేసీఆర్‌ ప్రణాళికలు.. డిజిటల్ సభ్యత్వ నమోదును ప్రారంభించనున్న బీఆర్‌ఎస్‌ | KCR Launches BRS Digital Membership Drive; Calls for District-wise Agitations Against Government</h2>
+                    <p>పార్టీ బలోపేతమే లక్ష్యంగా కేసీఆర్‌ ప్రణాళికలు.. డిజిటల్ సభ్యత్వ నమోదును ప్రారంభించనున్న బీఆర్‌ఎస్‌ | KCR Launches BRS Digital Membership Drive; Calls for District-wise Agitations A...</p>
+                    <a href="https://news.google.com/rss/articles/CBMi1wFBVV95cUxNYmxiU3hEWDdoQmhOMWdvajhZWjh4cDdlWnVHMjhJMUtoUzBoejVhdlhsd05pbFI2ck0yOERhbHFNY1RhUnZuS2NKMFdsX1JxYllsRk52bkRZc3BGb1NsZ0tITnVBTUJjVzZhZnJLZGl3ZEFtME9ITGl4R01ZbFg5d25QblpnbXZKX0luYlRQLWhaMk4ydXBycGlISEFTc2RfSmJIbVdWRXVPb08yMU01d0VVcVhKNVAzQzBta0RmcGo1YUJmVmotYTJLRWk3UEdBOVJoZl9IRQ?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="రైతు లోకం & క్రైమ్">
-                    <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 తెలంగాణ | 16-05-2026 | <span class="cat-tag">రైతు లోకం & క్రైమ్</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMipgFBVV95cUxOY01IMjVybi1EY3NmWDhyUEtyaWE2S0hEbWpPTjhmMDVPRk5NeEs4d3M0TWEyU0N0VkV6Ni1FQjNGc2tsdmMwYUI1YmhZZXFSOEd0SEs3b3VDVUNYdXpFN3JJV2NMNVFGaWloaWxPY1E2NGRHYWUtWlRJeTBIVkwtOERLS1ZsZVEwOFVTUlV6UmtJUExhZTNiREdJMmx0X2p0YVE1WDNR?oc=5" target="_blank">గిట్లయితే అమ్ముకునేదెట్ల?</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>Telangana Local Elections: తెలంగాణలో స్థానిక సమరం మొదలు! 12,760 పంచాయతీలకు మూడు విడతల్లో ఎన్నికలు.. తొలి వి...</h2>
+                    <p>Telangana Local Elections: తెలంగాణలో స్థానిక సమరం మొదలు! 12,760 పంచాయతీలకు మూడు విడతల్లో ఎన్నికలు.. తొలి వి......</p>
+                    <a href="https://news.google.com/rss/articles/CBMi7AFBVV95cUxNMGVCd0VGZzBGMFVGYkFxMF90UGhJZXlQUnVXWk5YUFJIOGFTMUk0a0xpMUFNX0o0NHBDNFM3RjBqbTE0U0VPczRIWGcwYVFJY2Vub2FjMHlseUoxSktVQ3dvUnR1VFAwd3MxZVVIV0VMUzA0T1oxdG9ERHRTclI0Mk95WVdaT1VaLWF3blZNYVhwZHNsbWxiY3ZiQV9TWTRoVVBpYnBoYmVjU2NlWmJocTFqWkZyYlJPTW9QbmYzb0luQWUzUDN6UUVmS01nNXltMnl0anBfVmNwZ2tzTHUzOTAzR1ZyVTQ2R05CYtIB8gFBVV95cUxPYmk3Nk9LVFc0VzFTczQwRzVTZzhEamo4b0Q2dUdrMS0zZzB1djNPUl9NVWR4Sk1yei16SXlvc2Q0UUJhNkhNS0lja3JYWVBxLWlGd015RDBKaVBKRDhWaGhlT0JZaFBNeDVua3V1TXpRZzlpZzFZeEJKc2YwWXUwekJKWjZPT045VER5elRFOEJiUkEzUThqYlFxemdfYUdBb2hIVGhlM08wbTFjcl81UG5CanplUVhybEdDTjVjLUZoY2FacDFmOWdVMFctaVRwaF9oVUt3bVV0TDViWGdmemVSVU53ZkhlR3B0VEZFSzJVUQ?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="రైతు లోకం & క్రైమ్">
-                    <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 తెలంగాణ | 16-05-2026 | <span class="cat-tag">రైతు లోకం & క్రైమ్</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMikgFBVV95cUxPQ19BUHh4S3ZRNS1XT1ZZZHROYmZVekdsZks2MUNJcW9ob1pYbTFTeF9DRzJWWG50T3NDMXNJYXgwanZPOGtoWTVNaHVNSWgyUzRfWGdjZ1B2Q2x5QnpsWGZhQUsyNmIzOTZ5VzhWeEVvbm5KM0MtbHJWbWNoMjJXbzRjOGRxNU8yV0swSHFBYzlRQQ?oc=5" target="_blank">Telangana warehouse crisis | ముక్కిపోతున్న బియ్యం.. దుర్గంధంగా మారిన గోదాములు</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>తెలంగాణలో స్థానిక సంస్థల ఎన్నికలు.. ఎప్పుడంటే?</h2>
+                    <p>తెలంగాణలో స్థానిక సంస్థల ఎన్నికలు.. ఎప్పుడంటే?...</p>
+                    <a href="https://news.google.com/rss/articles/CBMipwFBVV95cUxPNnNESUs3Zk1FRU5GTmt6dW5paFBrWDA3RWM4UGtSdFpTYldrc2ZHT3hTUE53aVR0T09iT1pJVmtaUjFpUUNnMnJha0lVUy0wdnhkbTRjT201ckFiXzdvUXFONTRqUEhDTE5OSmgtVlFUVDlTQk5zMEhuVEFJQWFmNVBJV3hVUDhGcGI2c1BaQk12MTNTc3ZNWmNXbEhVZC1GYnFWY3JHbw?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="రైతు లోకం & క్రైమ్">
-                    <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 తెలంగాణ | 16-05-2026 | <span class="cat-tag">రైతు లోకం & క్రైమ్</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxPaUduNmZXaWQtMmxudWZjYWhKTDc3U09ZczA1bGVzZlFnMXotUm5HRVh1WHZwZkNTR2ZqRUVnMllldnIza2FpTXM2UVk1dHZyVlNpZ216bHc2by0tTUhmYzg3NVY3Q29INHd2VFBENUJRVHhkMUgtM2RiM2xJN3pIckRIRnZtUGRxaWdoa0pLU1JYaklOY3YyTVNWSXpkTkRE0gGmAUFVX3lxTE9ZOEtySUNXRG54amhKbndtRVp0LVZlazdMRFR1THN2bC1TWmFUanNRVnFMM3pFVk5OZ09OWVRzQ2xtMEZnc2t1eUxQTnZQWkJTYTZ1enpnOG5NLUwzWWtuNWhuRWNjU3FCUkhpVWZKMXhnUHpkZmhYMnJYTHh1OHcxZzRjVnBMZl8tNERLVUpQX0VKdjVZTHRLR2UyUTJ1dHV3VHhJLXc?oc=5" target="_blank">Uttam Kumar Reddy: రాష్ట్ర వ్యాప్తంగా 8575 కొనుగోలు కేంద్రాలు.. ధాన్యం కొనుగోళ్లపై మంత్రి కీలక వ్యాఖ్యలు..</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>TG News: 50 కి.మీ.కు ఒక లోకల్‌ మార్కెట్‌</h2>
+                    <p>TG News: 50 కి.మీ.కు ఒక లోకల్‌ మార్కెట్‌...</p>
+                    <a href="https://news.google.com/rss/articles/CBMikgFBVV95cUxOdlVsNmFhOTZ5V25KQ3pMd1lmVVJLNnhXQ2dJM01YYzVIbmVkcXhDek9IUTBINVZ5VkhjNWxPaTJJZUFCQmpHeFBLR0tlZm5nVFF5WXo3ajBVRUtvUnNiLXAzY2RKSC1vc05rX0I0UWg3Nmc3MVFlUHBYUHBVOHNOanhUWDh4T2NtUE5EazN1bFIyd9IBkgFBVV95cUxOdlVsNmFhOTZ5V25KQ3pMd1lmVVJLNnhXQ2dJM01YYzVIbmVkcXhDek9IUTBINVZ5VkhjNWxPaTJJZUFCQmpHeFBLR0tlZm5nVFF5WXo3ajBVRUtvUnNiLXAzY2RKSC1vc05rX0I0UWg3Nmc3MVFlUHBYUHBVOHNOanhUWDh4T2NtUE5EazN1bFIydw?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="బిజినెస్ & మార్కెట్">
-                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 హైదరాబాద్ | 16-05-2026 | <span class="cat-tag">బిజినెస్ & మార్కెట్</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMioAJBVV95cUxPWG93ZG1BekRRTHQxSFhYRl9fckMyZF81SXZ6UWpaUVhOMll6MmNsbGlic21ycndqLTliOVF4Rl9QN1pJMkNWbzUtdlJqLWF2V3V2bEUyVy1ZbTdSSFhvVG9ablhDd0dQOTdtUVVfZWJBWndySmItazBEeS1HR3lwWEM5ZkRFanBSV0tZd191OEhnVm1EVmJIb2pEdktCc3JaYXktWkw0eUZ2b3d3NVZJMkg3UW9RQjVFWklxZ1ZNRHBaTWw4ZndoRHVXbnFMb1V2VjJHdUZ1RkttcVowU0hCZHNaR2RzLWppSG5wanM5cFByeTZMQ0dQcHRKRUFfQzVLdDNjT0tuZ3U2anBoY2VaUXZtUVg0bk1pb1Y1TkVJODXSAaYCQVVfeXFMTk9vWldhelRmbkZWLUM2Z1oxZEw2SDFidGZ2MTA0aUJNZm9NUWZqb1lwT2dTclNsUkVYWExDb3M0VklpTW1kMUZDMllkNU9rck5yY0trMUxNbGVOM2pVY085b1BOUFlGTlA5NVlNOWFiWHc1d3VyVUo5d1VraWpxSjFGN0I3UnN5SmlXa0p5Z1lZT1JHVXJPRVY4M3lVemo5MlhsQ0J6d29sM1kzMUVjdlA0SlpHQUpoSjhuZU5HdUZzb0liZnJqTy1FdUVKR1A3cHBhYXJabHVwSTFGSGZoQ1lhY3NlN0hiQnZYWkVvaW9LYjdUcEQ0MGRMVkhYVkhTQnRwUkhMa0VzN0szTzBhOFRmeW0zemgtMzRHRkdqa08xYmVJN1NB?oc=5" target="_blank">Business Ideas: వెజిటబుల్ బిజినెస్ స్టార్ట్ చేస్తున్నారా... అయితే హైదరాబాద్ సమీపంలోని ఈ హోల్ సేల్ మార్కెట్లో క</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1610473187211-137b0d7715ec?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>Telangana Farmers: దయనీయంగా తెలంగాణ రైతుల పరిస్థితి.. మహేశ్వర్ రెడ్డి</h2>
+                    <p>Telangana Farmers: దయనీయంగా తెలంగాణ రైతుల పరిస్థితి.. మహేశ్వర్ రెడ్డి...</p>
+                    <a href="https://news.google.com/rss/articles/CBMiqgFBVV95cUxQQlh5dUtncEctbTBBLTUyaEJreVBpZ18xeHBsejJZM1IxUWZfNS1SZTNKYkR1VlNpdDhxZEZmRmhCa05YQ0xLd0M0RGxUV0NQSllSLVlMdklXUTZlUXJWNm5DUTVJcHdvQjhCWEFLZ1BpWDh5UVJYanhxNHRiNHBkTG54bmVEbHp1ajJSSWNJTEpGSXlzSXUtVGwzMHRHOHF3RVN2TzMteXVUUdIBrwFBVV95cUxOMkEwYjdubFhnak82ZzJVbng1T1Nib09uLVBhNy1KbXJzWFl5c2V4UGFTbGpzQmJWdTU0N2Y1bXdxSFp2TGp0WlcwN1RjTjNmdVl0aGtMbS1JUVlsU1VySkZBNEJwSkI3ODVYMk1Xb1ZCWVJmNjZCQ3VyLUFmQXhHRXVxU1I5WlB1UjRXSm9md250MlRiTzZOTnh2Mi10OURTcV9vTWJfR29nV0htanlR?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="బిజినెస్ & మార్కెట్">
-                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 తెలంగాణ | 16-05-2026 | <span class="cat-tag">బిజినెస్ & మార్కెట్</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMi-AFBVV95cUxQVGhSbzExTG9xYjNZRElXQnY0aVdhSXQ4bVBNSzZVZEh1UXpDdUZwRWZqNE85bHNTTS1nc0JsYlhNaUpfeHJHV3cxUk9hOXRlQTlUaHRMc2lNT0dtQ3BDYlA5VWVNU2JVS2xGMC1QT0UtRGtSWkx5MmlaNnYxVkRoWWtxd1VxX2kxZlJpclM0d3dhdHJLQ2MyYWtnVzdmRzNjRF9qMmJEZXY5ai1QSmVjUUNzbEZkakZYcm1mak16U21VWEh0VW1QYmp6NE0ySE8yZThjVWl4WkRHdE1tSXdKc0duVld5VEg4TFZiZjBDMGlDWFdwdFh3SA?oc=5" target="_blank">తెలంగాణలో పెరగనున్న భూముల ధరలు</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1610473187211-137b0d7715ec?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>గిట్లయితే అమ్ముకునేదెట్ల?</h2>
+                    <p>గిట్లయితే అమ్ముకునేదెట్ల?...</p>
+                    <a href="https://news.google.com/rss/articles/CBMipgFBVV95cUxOY01IMjVybi1EY3NmWDhyUEtyaWE2S0hEbWpPTjhmMDVPRk5NeEs4d3M0TWEyU0N0VkV6Ni1FQjNGc2tsdmMwYUI1YmhZZXFSOEd0SEs3b3VDVUNYdXpFN3JJV2NMNVFGaWloaWxPY1E2NGRHYWUtWlRJeTBIVkwtOERLS1ZsZVEwOFVTUlV6UmtJUExhZTNiREdJMmx0X2p0YVE1WDNR?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="బిజినెస్ & మార్కెట్">
-                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 హైదరాబాద్ | 16-05-2026 | <span class="cat-tag">బిజినెస్ & మార్కెట్</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMitAFBVV95cUxPVzFzV0J3QndSbDE3UXU2cUF1LTdYSE5uTTlJSmFZQXlWclZMelM3bG5MVXVaOVhnWnJaVGJyNl9GQjVoSjF1WnZpQTVYdkM4ZG1kVFE5TUozVV9GX2dxSXdPQ29GU2hsSERhLTdFLVRKdFZMNGdTc0NCVDIweGM4NUlBQlh3Q0g4LUlvOWZkTjZUYTl6Vk9UWVZoQzAzMEFfR2pRSFRaNFprMkYxc2FneHVybmvSAboBQVVfeXFMTVpXbFZOMEh6dmZ5YzNpSVlxeG81d2Y5WXI2d0ZBazlaNlZKYlhaZzhvM3JqcEtVLWdjSmEtVWVqY0VlQ3pNLWRUXzRreWtxc2MzUmdpQ2RHNzJramVZeVVPZVRBUFhIM0plV0RrTmdRMUpmZzB0QWxyQ21KXzB6aGNyb200ZUt3emliaUxQMWhfQm83LThiSGJPQkJVUk1wa1Utd2ctUkFHTjJnZGVWZEYyVnJvbmVWSElR?oc=5" target="_blank">Vegetable Price : హైదరాబాద్ వీకెండ్ మార్కెట్స్ లో కూరగాయల ధరలివే..</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1610473187211-137b0d7715ec?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>Telangana warehouse crisis | ముక్కిపోతున్న బియ్యం.. దుర్గంధంగా మారిన గోదాములు</h2>
+                    <p>Telangana warehouse crisis | ముక్కిపోతున్న బియ్యం.. దుర్గంధంగా మారిన గోదాములు...</p>
+                    <a href="https://news.google.com/rss/articles/CBMikgFBVV95cUxPQ19BUHh4S3ZRNS1XT1ZZZHROYmZVekdsZks2MUNJcW9ob1pYbTFTeF9DRzJWWG50T3NDMXNJYXgwanZPOGtoWTVNaHVNSWgyUzRfWGdjZ1B2Q2x5QnpsWGZhQUsyNmIzOTZ5VzhWeEVvbm5KM0MtbHJWbWNoMjJXbzRjOGRxNU8yV0swSHFBYzlRQQ?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
-                <div class="news-grid-card" data-cat="బిజినెస్ & మార్కెట్">
-                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" alt="News">
-                    <div class="grid-card-body">
-                        <span class="grid-meta">📍 తెలంగాణ | 16-05-2026 | <span class="cat-tag">బిజినెస్ & మార్కెట్</span></span>
-                        <h3><a href="https://news.google.com/rss/articles/CBMivAJBVV95cUxOR0RQVWlxQnYyQk9DOG5oc1prTmhmRHhlUDdjTXRkeWZ5cldpeFV3ZW41WWxfa2RzdU03b2huaHhYX0dMN3pZR2dJNnpGVmN0Ty1vZEVsSjh1S2w3OEJfMl9MdXRYUzBUa29MU3prbFVYMnpuaUtzdmJrOGVSRFBXN1BqYk1Fb2R3clFENkF3UWk3OEp0bVY5bGN1WFlYRW9TT256bHhtanFOcU85WW5ILUU4TW9TSWZmRjFWa3g0clFFTmY1eHlfNWtLcGhkWGlrSjZ4dnJLdVlzUUNKLXNocm15OWs1ZGttUENjWjJuNVJtZHB4VnhpaGF3VGxpOXBXY3V1bkJoQ3J0YmN0eE40UncxSWhCd0FxUldCaWpMN1p4RGRvV05JeTIxZXpOZTZLazNXRDdvLVRYU1p10gHCAkFVX3lxTE1admVOMWZJc0wwU3lGUC11dlJ5NkV1RTJUajFUdno5dkdTNjBhTWJsZzMwb21rb09RTEtESUc4MTdnbGJtdlozRVVmOHhzUWd3U3pwM0Z1TVVzQ1J5bjVSYnpiVWNIRTBLV2E4aVllelQwWHJ6ZEE1LXVNVGt5Q3ROaUVnZWhKeUQ0bDdFM3c1d1g2bGtwOXdNVkdDbnp6bDl0dl9KQjBwUEJBaUE3NV9McU1Jd0ZLV0hWaTByeElzRWFmdS05WXpXTXZGS0pYWVQzMThMUjRMTk5Yd05BcFdsYlNydERrVG1ta200T09RSlExMS1ualItaGpiZHRjcG9iNExWQU1FTG1FaENwcnRYc2VYMWVsMXdKUDQwaV9SUFR5WFUwdzZ5ZDNJdHdaaTZ0Y0t1WlJkVE0zTmplaDBIb1E?oc=5" target="_blank">Gold Rate Today: శాంతించిన బంగారం ధరలు.. 2 రోజుల తర్వాత ఊరట.. ఈరోజు 22, 24 క్యారెట్ల గోల్డ్ రేట్లు ఇవే</a></h3>
-                        <p>...</p>
-                    </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1610473187211-137b0d7715ec?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>Uttam Kumar Reddy: రాష్ట్ర వ్యాప్తంగా 8575 కొనుగోలు కేంద్రాలు.. ధాన్యం కొనుగోళ్లపై మంత్రి కీలక వ్యాఖ్యలు..</h2>
+                    <p>Uttam Kumar Reddy: రాష్ట్ర వ్యాప్తంగా 8575 కొనుగోలు కేంద్రాలు.. ధాన్యం కొనుగోళ్లపై మంత్రి కీలక వ్యాఖ్యలు.....</p>
+                    <a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxPaUduNmZXaWQtMmxudWZjYWhKTDc3U09ZczA1bGVzZlFnMXotUm5HRVh1WHZwZkNTR2ZqRUVnMllldnIza2FpTXM2UVk1dHZyVlNpZ216bHc2by0tTUhmYzg3NVY3Q29INHd2VFBENUJRVHhkMUgtM2RiM2xJN3pIckRIRnZtUGRxaWdoa0pLU1JYaklOY3YyTVNWSXpkTkRE0gGmAUFVX3lxTE9ZOEtySUNXRG54amhKbndtRVp0LVZlazdMRFR1THN2bC1TWmFUanNRVnFMM3pFVk5OZ09OWVRzQ2xtMEZnc2t1eUxQTnZQWkJTYTZ1enpnOG5NLUwzWWtuNWhuRWNjU3FCUkhpVWZKMXhnUHpkZmhYMnJYTHh1OHcxZzRjVnBMZl8tNERLVUpQX0VKdjVZTHRLR2UyUTJ1dHV3VHhJLXc?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
                 </div>
-                
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1610473187211-137b0d7715ec?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>ఆ పురుగు మందులను ఆన్‌లైన్‌లో విక్రయించొద్దు.. తెలంగాణ వ్యవసాయ కమిషన్‌ ఆదేశాలు</h2>
+                    <p>ఆ పురుగు మందులను ఆన్‌లైన్‌లో విక్రయించొద్దు.. తెలంగాణ వ్యవసాయ కమిషన్‌ ఆదేశాలు...</p>
+                    <a href="https://news.google.com/rss/articles/CBMinwJBVV95cUxOejVXZXFrNkNTZlZsckRWaW85VWYzWmtTeERVN2R1NE40Nzc4NDBTckE2V1FlcTJJdTVHeDZFRGVUUjhGVW5ZYm1pVHpLdmViamNSMzJ6b0lWcWdWMmkzNUg1c1ExdGFSSmpEUGM0M0Ytc3FDZ01vZGsyMk82eEtySDFvRTlyQWpxeGlVMTJvMVhac01OMUpCaXdFak8yNmJ2Smd5aFlMMEZHbU9keUpmMXNPY19sLTJKZjRzTHU1Wks3anBVeTFzczRhdnpTcFVaLW04S1lvdHh6MjUzejd0NGN2emhLUE42TWdNdHJEU1J0VVQwU2VXRmxXcExuSTNnOTlHN2F4cThCZEwxd1hNSU4zSl9seXp0ZlR0alJRUdIBpAJBVV95cUxQbk16bFdDZGJDNF9nZF9TVE9DOFRVMnVsRmhMcTRHeWNDOTZxOU8xaFJTcHl2Rnk3NWxBZlVhWEFTclByQkF3VXoxQ3k4cWxjc3NIRUx2RDk5V0dvZWJsbmpaNUZpMGF3UVZ4NlNLem0wVmdBYkhxOEJlMnFJUWhYSDhYdlpIRHl1dlc2ZkxDeGt1NE9uQjVpc0ZENElPT1Z6b20tMG9vanh0WkpLalM4Q1JPMFVBTTY5TFpEYTVBUGJvMzhVTWdXWHhHcFV2SFF1UHVzX1BzR3UycWNzVC1nU1hOR0VySjNKVkVTYW82bFhCS1NXNWNZZE81M3RPdUN1akxCaGg1VG5TR2txTlhfRXNIZkdwMHh1dDF5UUtXV1lZbkNE?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
+                </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>Gold price today : క్రూడాయిల్ ధరలు భారీగా పెరుగుదల.. తగ్గిన బంగారం రేట్లు</h2>
+                    <p>Gold price today : క్రూడాయిల్ ధరలు భారీగా పెరుగుదల.. తగ్గిన బంగారం రేట్లు...</p>
+                    <a href="https://news.google.com/rss/articles/CBMimwFBVV95cUxPU1FJUmtLejdzLVNoOWhvOUxPWjFTTXFFc2tUeURrcDhZdHRncGNuaHBVdFpiVElqajFyUlRuSS12REs2Qzd0YVdLM3EzdWdfV2VVM1UxN3RjN0htdjVBcXlILURMMHlrMXlLNV9VcnZnLUQ4RUdNNFV1c1dFQVBzVGdld294VlRMYU00V0dEWEdTb2VLTlFzLXByd9IBoAFBVV95cUxPYWo4UkZXYjNKNDh1OUc3eFBkX1ZLclU5TjVOcW9LU2tvV2lRYy1WM0NfV01MVEU3dGM4VlY5VGJyblNIOGl3ZXRtVW5WRUgyM0E5TEZCX09hSHA4YVFNMmhiLVNGa0FTS3pUQW9UTU52LXhkeTBoYzdfeFMyRG9BVkt4RUdvdTZqLVI5dDIwTTJ4cWctckQ1SG44TWR1cWFM?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
+                </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>Gold Price Today: ఒకటో తేదీ గుడ్ న్యూస్... బంగారం ధర ఢమాల్... 10 గ్రాములకు ఎంతంటే</h2>
+                    <p>Gold Price Today: ఒకటో తేదీ గుడ్ న్యూస్... బంగారం ధర ఢమాల్... 10 గ్రాములకు ఎంతంటే...</p>
+                    <a href="https://news.google.com/rss/articles/CBMizAFBVV95cUxOVTlSNXVUeklzcEEtcnBVVnE1V0d3X0Mxc05wVFN5YndmQjdUUXppa1g1Q1c0bGdLZEItSVFYVzlTeW9jbHZ5dnlDcGthMFQtZjlhcVhLUWQ0SVVjOWRBQnpFTlY1VGZXSllfV2FRaHdFaEhWSVdPNktIR1I4YTBMY19aMmJGUFFVSWUtekd1aFpVYUtCM3hKYi11ZGVHWEFVd012R0xkWXlGZGxCcjhkZG9tM2VTQ1ctZWc5X2ZVMjRnNnN3QnlvR0pmaEnSAdIBQVVfeXFMT2dUQ3poaU1HcEp2eGlxY2NBNnF0blhETkYydWxBLXZ0bUZJX3FtQlZaZTVIZERwSml3aU9DYmNyUXVlYW85eE5kdVVmNUtBTGZoT2NLSDVqSm85RUY0MUYzb3BaeVFhVzYycG43UUJ2RTZrTFE0eGQxVl9GMVE4TUVzMXBvQWUwTFl5elVTRlYzTl9aSm04bUtuT250X1AyaHFxU2d2T212UDB1TW9NbG0xNFdMekJhSWlIM3VBd0twYXd5TC14dFJIMzdEOUpLa2lB?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
+                </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>Gold Price Today : పెళ్లిళ్ల సీజన్‌లో ఊరట.. పసిడి పరుగుకు బ్రేక్..నిలకడగా బంగారం, వెండి ధరలు</h2>
+                    <p>Gold Price Today : పెళ్లిళ్ల సీజన్‌లో ఊరట.. పసిడి పరుగుకు బ్రేక్..నిలకడగా బంగారం, వెండి ధరలు...</p>
+                    <a href="https://news.google.com/rss/articles/CBMirwFBVV95cUxNc2dLOHJ1RVV1ZEhRNHJpdXRtV0JqUkpfRzdqYlFlMjlpSnVZVkZQd3dMd3QwRkNwUDV4S2huZm5NODkwejJobjlRUmQtV19Fc2J6S0JlLWVjVk9FY1c1eGZRZmVleDVGdzg5SjBnZ09xQU9nY0VFb0Eyd040c1I5NHFJQUNTWklndUN6cnpaSVBsV0ZzaUdwSFdPckltbFFoU0dSeVBoTDVPNE1LMWdj0gG0AUFVX3lxTE1VNWt5N3YwRXBqUUo3WU5VTVgyQ3dneDhHYzBKWjZ6VnVteUJxNDNSZTBNeW4yWGVhVkpybF9YSGdjeEZpMERBejhiSW8yYWVucHgtTVRVOW1uT2R5bEx1X3VqVEZXbmZyamV6cFMwQ0FvTmo0RjhWQjAyWktmalk2Ti1wTmQwbDZOYmtvTEIzM25TUVp3TGtOcUdWTnU1NGVIaUZCdHpiU1cxdWxJd0lRSXRHZA?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
+                </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>మిర్చి రైతుకు కాసుల వర్షం.. గత మూడేళ్లలో ఇదే రికార్డు ధర, క్వింటా ఎంతంటే..?</h2>
+                    <p>మిర్చి రైతుకు కాసుల వర్షం.. గత మూడేళ్లలో ఇదే రికార్డు ధర, క్వింటా ఎంతంటే..?...</p>
+                    <a href="https://news.google.com/rss/articles/CBMi6gFBVV95cUxPVVpqbGhmblVRYkpNdVNVaENrZmwtN25fOVYwYlNzdUU1X0VLYl9yeFhibjZRMldoZ0lFNXlZWnYzR0UxNlcta3B2MTYxOERzVllfYUFMbDdTTThkeExKejUwSjhqVkhXYU9ZQU42Tk9YMXZsRmxEQkNHVk41anB5bzdxRzZqYUUtZFlhNTZKdmNhNUpYdk1VczhXVVhuVk4zQlFfVm9sRDdJNGhuOTlLRENKNUtLUExjdHdNM25hcjdrTjczbG90c19BX3I0bWMxMFJnamFlOFNhQm1PRE00T2pJeUJJVE9DblHSAe8BQVVfeXFMT0xuMXdjT0t1LTRiYzdtUnlZcWhzS25SQWZpWVdPc2x4R1VXOHNYZ3JjMjFOQVUzMDVfdWFtemxtNkd3d3ZuSXNlNHdOa3BfTnFuR2NuMWZXdjRBS3RBT2hNUTJXSUFLMWhMTlQ2VkhNdVl5RDlWMVVYMC1iY0M1NFpsQzk0aHloMnRINkUtbXdTcV9JWHREeHYwOGpBUmRjbGZXSUdHU2RyclBxd1p5VE1veGFPSGJ4cFcxY085NnVpMkNpYmVkcDktMHNuQW1OcnQzOWVkOF9ZNG55Z2RPRlo1cWo1UGFIalJycVprUEk?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
+                </div>
+            </div>
+            
+            <div class="news-card">
+                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" alt="NINT Local">
+                <div class="news-body">
+                    <span class="news-meta">📍 తెలంగాణ | 16-05-2026</span>
+                    <h2>Gold Breaking: బుల్లెట్ కంటే వేగంగా.. ‘బంగారం’ జర ఆగరాదు!</h2>
+                    <p>Gold Breaking: బుల్లెట్ కంటే వేగంగా.. ‘బంగారం’ జర ఆగరాదు!...</p>
+                    <a href="https://news.google.com/rss/articles/CBMiywFBVV95cUxQZDBzdUN0S1BURHVEcVNDREVyb2NUWkRUaGpUU1oyTGJsd1pERmhEQVNxeXBRWllucGJCR1VUT1Ryc2FhUkNtenE0N3Y2QXJyWkRvZEpubUFFbXY0N0Q2elUwRmhIUU5Xa00xdDhqOFVoZ2V0WGVvcTJrUmMtOFlXeHRBZ1JzX004dXdHUEVvLVFaT2ZKZElOazZSMjBQcmxSR2dVX0hYSEhsOFdNNk1KQ2hwZ3dWQlVxblQ4WktsT1Y2RFhpcW1aeTZTOA?oc=5" target="_blank" class="read-more-btn">పూర్తిగా చదవండి (Source) →</a>
+                </div>
+            </div>
+            
     </div>
 </div>
 
 <footer>
-    <p>&copy; 2026 NINT News Network • తెలంగాణ బ్రీఫింగ్ ఇంజిన్</p>
+    <p>&copy; 2026 NINT NEWS NETWORK • తెలంగాణ ಬ್ರೀಫಿಂಗ್ ఇಂజిన్</p>
 </footer>
 
 </body>
