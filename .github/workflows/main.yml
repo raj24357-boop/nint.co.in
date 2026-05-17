@@ -1,0 +1,1296 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+
+// ── Palette & Theme ───────────────────────────────────────────────────────────
+const COLORS = {
+  bg: "#0a0c10",
+  surface: "#111318",
+  surfaceAlt: "#161b22",
+  border: "#21262d",
+  borderBright: "#30363d",
+  accent: "#00d4aa",
+  accentDim: "#00d4aa22",
+  accentGlow: "#00d4aa44",
+  warn: "#f0a000",
+  warnDim: "#f0a00022",
+  danger: "#e05252",
+  dangerDim: "#e0525222",
+  info: "#4d9de0",
+  infoDim: "#4d9de022",
+  success: "#3fb950",
+  successDim: "#3fb95022",
+  muted: "#484f58",
+  text: "#e6edf3",
+  textSub: "#8b949e",
+  textDim: "#484f58",
+};
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+const uid = () => Math.random().toString(36).slice(2, 9);
+const ts = () => new Date().toISOString().replace("T", " ").slice(0, 23);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+// ── Workflow Definitions ──────────────────────────────────────────────────────
+const WORKFLOW_DEFS = [
+  {
+    id: "schema-sync",
+    name: "Schema Sync",
+    icon: "⬡",
+    color: COLORS.accent,
+    sections: ["fetch-schema", "diff-analysis", "migration-gen", "apply-patch"],
+    intervalMs: 12000,
+    priority: "CRITICAL",
+  },
+  {
+    id: "data-pipeline",
+    name: "Data Pipeline",
+    icon: "⟿",
+    color: COLORS.info,
+    sections: ["ingest", "transform", "validate", "load"],
+    intervalMs: 8000,
+    priority: "HIGH",
+  },
+  {
+    id: "health-probe",
+    name: "Health Monitor",
+    icon: "◈",
+    color: COLORS.success,
+    sections: ["ping-services", "check-latency", "eval-thresholds", "report"],
+    intervalMs: 5000,
+    priority: "MEDIUM",
+  },
+  {
+    id: "config-drift",
+    name: "Config Drift Detector",
+    icon: "⟁",
+    color: COLORS.warn,
+    sections: ["snapshot", "compare", "reconcile", "notify"],
+    intervalMs: 15000,
+    priority: "HIGH",
+  },
+  {
+    id: "cache-warm",
+    name: "Cache Warmer",
+    icon: "⬡",
+    color: COLORS.info,
+    sections: ["collect-keys", "priority-sort", "prefetch", "verify"],
+    intervalMs: 20000,
+    priority: "LOW",
+  },
+];
+
+const SECTION_LABELS = {
+  "fetch-schema": "Fetch Remote Schema",
+  "diff-analysis": "Diff Analysis",
+  "migration-gen": "Generate Migration",
+  "apply-patch": "Apply Patch",
+  ingest: "Ingest Source Data",
+  transform: "Transform Records",
+  validate: "Validate Output",
+  load: "Load to Target",
+  "ping-services": "Ping Services",
+  "check-latency": "Check Latency",
+  "eval-thresholds": "Eval Thresholds",
+  report: "Emit Report",
+  snapshot: "Capture Snapshot",
+  compare: "Compare State",
+  reconcile: "Reconcile Drift",
+  notify: "Send Notifications",
+  "collect-keys": "Collect Cache Keys",
+  "priority-sort": "Priority Sort",
+  prefetch: "Prefetch Data",
+  verify: "Verify Cache",
+};
+
+const LOG_TEMPLATES = {
+  "fetch-schema": [
+    "Connecting to remote schema registry...",
+    "Fetching schema v{v} from endpoint",
+    "Received {n} type definitions",
+    "Schema checksum: {h}",
+  ],
+  "diff-analysis": [
+    "Running 3-way diff against baseline",
+    "Detected {n} field additions, {m} removals",
+    "Conflict resolution: MERGE_LATEST strategy",
+    "Diff complete — delta score {d}",
+  ],
+  "migration-gen": [
+    "Generating migration script...",
+    "Script contains {n} statements",
+    "Estimated execution: {t}ms",
+    "Migration staged for review",
+  ],
+  "apply-patch": [
+    "Acquiring schema write lock",
+    "Applying {n} patch operations",
+    "Committing transaction",
+    "Lock released — patch applied ✓",
+  ],
+  ingest: [
+    "Opening data stream from source",
+    "Received batch #{b} — {n} records",
+    "Throughput: {r} rec/s",
+    "Batch checksum verified",
+  ],
+  transform: [
+    "Applying {n} transform rules",
+    "Field mapping: {f} columns remapped",
+    "Null coercion applied to {n} fields",
+    "Transform pipeline complete",
+  ],
+  validate: [
+    "Running schema validation",
+    "{n} records passed, {m} flagged",
+    "Applying correction heuristics",
+    "Validation score: {s}%",
+  ],
+  load: [
+    "Opening write channel to target",
+    "Flushing {n} records",
+    "Write committed — {t}ms elapsed",
+    "Target acknowledged receipt",
+  ],
+  "ping-services": [
+    "Pinging {n} registered endpoints",
+    "All primary nodes responding",
+    "2 edge nodes degraded — logged",
+    "Ping sweep complete",
+  ],
+  "check-latency": [
+    "Sampling p50/p95/p99 latency",
+    "p50={a}ms  p95={b}ms  p99={c}ms",
+    "Baseline delta: {d}%",
+    "Latency within acceptable bounds",
+  ],
+  "eval-thresholds": [
+    "Evaluating {n} alert thresholds",
+    "CPU threshold: {c}% (limit {l}%)",
+    "Memory pressure: nominal",
+    "No threshold breaches detected",
+  ],
+  report: [
+    "Compiling health snapshot",
+    "Overall health score: {s}/100",
+    "Emitting metrics to aggregator",
+    "Report dispatched",
+  ],
+  snapshot: [
+    "Capturing config snapshot #{n}",
+    "Serializing {n} config keys",
+    "Snapshot stored at {h}",
+    "Snapshot fingerprint: {f}",
+  ],
+  compare: [
+    "Comparing against last snapshot",
+    "Found {n} drift keys",
+    "Drift severity: {s}",
+    "Comparison complete",
+  ],
+  reconcile: [
+    "Reconciling {n} drifted values",
+    "Applying authoritative config",
+    "{n} keys corrected, {m} skipped",
+    "Reconciliation committed",
+  ],
+  notify: [
+    "Preparing notification payload",
+    "Routing to {n} subscribers",
+    "Delivery confirmed: {n}/{m}",
+    "Notification cycle closed",
+  ],
+  "collect-keys": [
+    "Scanning cache namespace",
+    "Identified {n} cold keys",
+    "Priority queue built — {n} entries",
+    "Key collection complete",
+  ],
+  "priority-sort": [
+    "Sorting by access frequency",
+    "Top {n} keys flagged for prefetch",
+    "LRU eviction candidates: {m}",
+    "Sort complete",
+  ],
+  prefetch: [
+    "Issuing prefetch for {n} keys",
+    "Batch {b}/{t} loaded",
+    "Cache fill rate: {r}%",
+    "Prefetch complete",
+  ],
+  verify: [
+    "Verifying cache consistency",
+    "{n} keys confirmed warm",
+    "Hit-rate improvement: +{d}%",
+    "Cache verification passed ✓",
+  ],
+};
+
+function renderLog(section) {
+  const templates = LOG_TEMPLATES[section] || ["Processing..."];
+  const r = (n, m = 100) => Math.floor(Math.random() * m + n);
+  return templates[Math.floor(Math.random() * templates.length)]
+    .replace("{v}", `${r(1, 9)}.${r(0, 99)}.${r(0, 999)}`)
+    .replace("{n}", r(2, 50))
+    .replace("{m}", r(1, 20))
+    .replace("{h}", Math.random().toString(16).slice(2, 10))
+    .replace("{f}", Math.random().toString(16).slice(2, 10))
+    .replace("{t}", r(10, 500))
+    .replace("{d}", r(1, 30))
+    .replace("{b}", r(1, 20))
+    .replace("{r}", r(100, 9999))
+    .replace("{s}", r(75, 100))
+    .replace("{l}", r(70, 95))
+    .replace("{c}", r(10, 80))
+    .replace("{a}", r(5, 50))
+    .replace("{b}", r(50, 150))
+    .replace("{c}", r(150, 400));
+}
+
+// ── State Machine ─────────────────────────────────────────────────────────────
+function createWorkflowState() {
+  return WORKFLOW_DEFS.map((def) => ({
+    ...def,
+    status: "idle",
+    cycleCount: 0,
+    lastRun: null,
+    nextRun: Date.now() + def.intervalMs,
+    currentSection: null,
+    sectionProgress: {},
+    logs: [],
+    cycles: [],
+    health: 100,
+    errorCount: 0,
+    avgDuration: 0,
+    totalDuration: 0,
+  }));
+}
+
+// ── Simulation Engine ─────────────────────────────────────────────────────────
+async function runWorkflowCycle(wfId, setState, signal) {
+  const def = WORKFLOW_DEFS.find((d) => d.id === wfId);
+  if (!def) return;
+
+  const cycleId = uid();
+  const cycleStart = Date.now();
+  const sectionResults = [];
+
+  setState((prev) =>
+    prev.map((w) =>
+      w.id !== wfId
+        ? w
+        : {
+            ...w,
+            status: "running",
+            currentSection: null,
+            sectionProgress: {},
+            logs: [
+              ...w.logs.slice(-200),
+              { id: uid(), time: ts(), level: "INFO", msg: `── Cycle #${w.cycleCount + 1} started ──`, section: null },
+            ],
+          }
+    )
+  );
+
+  for (const section of def.sections) {
+    if (signal.aborted) return;
+
+    const sectionStart = Date.now();
+    const shouldFail = Math.random() < 0.06; // 6% failure rate per section
+
+    setState((prev) =>
+      prev.map((w) =>
+        w.id !== wfId
+          ? w
+          : {
+              ...w,
+              currentSection: section,
+              sectionProgress: { ...w.sectionProgress, [section]: "running" },
+              logs: [
+                ...w.logs.slice(-200),
+                { id: uid(), time: ts(), level: "INFO", msg: `→ ${SECTION_LABELS[section]}`, section },
+              ],
+            }
+      )
+    );
+
+    // Emit 2-4 log lines per section with timing
+    const logCount = 2 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < logCount; i++) {
+      if (signal.aborted) return;
+      await sleep(200 + Math.random() * 400);
+      const msg = renderLog(section);
+      const level = shouldFail && i === logCount - 1 ? "ERROR" : "INFO";
+      setState((prev) =>
+        prev.map((w) =>
+          w.id !== wfId
+            ? w
+            : { ...w, logs: [...w.logs.slice(-200), { id: uid(), time: ts(), level, msg, section }] }
+        )
+      );
+    }
+
+    const sectionDuration = Date.now() - sectionStart;
+
+    if (shouldFail) {
+      sectionResults.push({ section, status: "failed", duration: sectionDuration });
+      setState((prev) =>
+        prev.map((w) =>
+          w.id !== wfId
+            ? w
+            : {
+                ...w,
+                status: "error",
+                currentSection: null,
+                errorCount: w.errorCount + 1,
+                health: clamp(w.health - 15, 0, 100),
+                sectionProgress: { ...w.sectionProgress, [section]: "failed" },
+                logs: [
+                  ...w.logs.slice(-200),
+                  { id: uid(), time: ts(), level: "ERROR", msg: `✗ Section failed: ${SECTION_LABELS[section]}`, section },
+                ],
+              }
+        )
+      );
+      break;
+    } else {
+      sectionResults.push({ section, status: "done", duration: sectionDuration });
+      setState((prev) =>
+        prev.map((w) =>
+          w.id !== wfId
+            ? w
+            : {
+                ...w,
+                sectionProgress: { ...w.sectionProgress, [section]: "done" },
+                health: clamp(w.health + 1, 0, 100),
+              }
+        )
+      );
+    }
+
+    await sleep(100);
+  }
+
+  if (signal.aborted) return;
+
+  const cycleDuration = Date.now() - cycleStart;
+  const allPassed = sectionResults.every((r) => r.status === "done");
+  const cycleRecord = {
+    id: cycleId,
+    time: ts(),
+    duration: cycleDuration,
+    status: allPassed ? "success" : "failed",
+    sections: sectionResults,
+  };
+
+  setState((prev) =>
+    prev.map((w) => {
+      if (w.id !== wfId) return w;
+      const newTotal = w.totalDuration + cycleDuration;
+      const newCount = w.cycleCount + 1;
+      return {
+        ...w,
+        status: allPassed ? "idle" : "error",
+        currentSection: null,
+        cycleCount: newCount,
+        lastRun: ts(),
+        nextRun: Date.now() + def.intervalMs,
+        avgDuration: Math.round(newTotal / newCount),
+        totalDuration: newTotal,
+        cycles: [cycleRecord, ...w.cycles].slice(0, 50),
+        logs: [
+          ...w.logs.slice(-200),
+          {
+            id: uid(),
+            time: ts(),
+            level: allPassed ? "SUCCESS" : "ERROR",
+            msg: allPassed
+              ? `✓ Cycle #${newCount} complete — ${cycleDuration}ms`
+              : `✗ Cycle #${newCount} aborted after ${cycleDuration}ms`,
+            section: null,
+          },
+        ],
+      };
+    })
+  );
+}
+
+// ── Components ────────────────────────────────────────────────────────────────
+
+const css = (strings, ...vals) => strings.reduce((acc, s, i) => acc + s + (vals[i] ?? ""), "");
+
+const globalStyle = css`
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0c10;
+    color: #e6edf3;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  @keyframes pulse-ring {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(2); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
+  @keyframes slide-in-left {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slide-in-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes bar-fill {
+    from { width: 0; }
+  }
+  @keyframes glow-pulse {
+    0%,100% { box-shadow: 0 0 8px #00d4aa33; }
+    50% { box-shadow: 0 0 20px #00d4aa66; }
+  }
+`;
+
+function StatusDot({ status, color }) {
+  const map = {
+    running: COLORS.accent,
+    idle: COLORS.muted,
+    error: COLORS.danger,
+    success: COLORS.success,
+  };
+  const c = color || map[status] || COLORS.muted;
+  return (
+    <span style={{ position: "relative", display: "inline-block", width: 10, height: 10 }}>
+      <span
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: "50%",
+          background: c,
+          opacity: status === "running" ? 1 : 0.7,
+        }}
+      />
+      {status === "running" && (
+        <span
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "50%",
+            background: c,
+            animation: "pulse-ring 1.2s ease-out infinite",
+          }}
+        />
+      )}
+    </span>
+  );
+}
+
+function HealthBar({ value, height = 4 }) {
+  const color =
+    value >= 80 ? COLORS.success : value >= 50 ? COLORS.warn : COLORS.danger;
+  return (
+    <div
+      style={{
+        height,
+        background: "#21262d",
+        borderRadius: 2,
+        overflow: "hidden",
+        flex: 1,
+      }}
+    >
+      <div
+        style={{
+          height: "100%",
+          width: `${value}%`,
+          background: color,
+          transition: "width 0.6s ease, background 0.4s",
+          animation: "bar-fill 0.8s ease",
+        }}
+      />
+    </div>
+  );
+}
+
+function SectionPill({ section, status, color }) {
+  const statusColor =
+    status === "done"
+      ? COLORS.success
+      : status === "running"
+      ? color || COLORS.accent
+      : status === "failed"
+      ? COLORS.danger
+      : COLORS.muted;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "4px 10px",
+        borderRadius: 4,
+        border: `1px solid ${statusColor}33`,
+        background: `${statusColor}11`,
+        animation: status === "running" ? "glow-pulse 1.5s ease infinite" : "none",
+        transition: "all 0.3s ease",
+      }}
+    >
+      <StatusDot status={status === "done" ? "success" : status === "failed" ? "error" : status} />
+      <span style={{ color: statusColor, fontSize: 11, letterSpacing: "0.04em" }}>
+        {SECTION_LABELS[section] || section}
+      </span>
+      {status === "done" && (
+        <span style={{ color: COLORS.success, fontSize: 10, marginLeft: "auto" }}>✓</span>
+      )}
+      {status === "failed" && (
+        <span style={{ color: COLORS.danger, fontSize: 10, marginLeft: "auto" }}>✗</span>
+      )}
+      {status === "running" && (
+        <span
+          style={{
+            marginLeft: "auto",
+            width: 8,
+            height: 8,
+            border: `1.5px solid ${color || COLORS.accent}`,
+            borderTopColor: "transparent",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+            display: "inline-block",
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function WorkflowCard({ wf, onClick, active }) {
+  const lastCycle = wf.cycles[0];
+  const successRate =
+    wf.cycles.length === 0
+      ? 100
+      : Math.round((wf.cycles.filter((c) => c.status === "success").length / wf.cycles.length) * 100);
+
+  const timeToNext = Math.max(0, wf.nextRun - Date.now());
+  const countdownSec = Math.ceil(timeToNext / 1000);
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        background: active ? COLORS.surfaceAlt : COLORS.surface,
+        border: `1px solid ${active ? wf.color + "55" : COLORS.border}`,
+        borderRadius: 8,
+        padding: "14px 16px",
+        cursor: "pointer",
+        transition: "all 0.2s ease",
+        animation: "slide-in-up 0.3s ease",
+        boxShadow: active ? `0 0 20px ${wf.color}22` : "none",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {active && (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 3,
+            background: wf.color,
+            borderRadius: "0 2px 2px 0",
+          }}
+        />
+      )}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+        <span style={{ fontSize: 16, color: wf.color }}>{wf.icon}</span>
+        <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 700, color: COLORS.text, letterSpacing: "0.02em" }}>
+          {wf.name}
+        </span>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6 }}>
+          <StatusDot status={wf.status} color={wf.color} />
+          <span
+            style={{
+              fontSize: 9,
+              letterSpacing: "0.12em",
+              color: wf.status === "running" ? wf.color : wf.status === "error" ? COLORS.danger : COLORS.textDim,
+              fontWeight: 600,
+              textTransform: "uppercase",
+            }}
+          >
+            {wf.status}
+          </span>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
+        <HealthBar value={wf.health} height={3} />
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+        <Metric label="Cycles" value={wf.cycleCount} />
+        <Metric label="Success" value={`${successRate}%`} color={successRate >= 90 ? COLORS.success : successRate >= 70 ? COLORS.warn : COLORS.danger} />
+        <Metric label={wf.status === "running" ? "Section" : "Next in"} value={wf.status === "running" && wf.currentSection ? (SECTION_LABELS[wf.currentSection] || wf.currentSection).slice(0, 10) + "…" : `${countdownSec}s`} color={wf.status === "running" ? wf.color : COLORS.textSub} />
+      </div>
+    </div>
+  );
+}
+
+function Metric({ label, value, color }) {
+  return (
+    <div>
+      <div style={{ fontSize: 9, color: COLORS.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 2 }}>{label}</div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: color || COLORS.text }}>{value}</div>
+    </div>
+  );
+}
+
+function LogLine({ entry }) {
+  const levelColor =
+    entry.level === "ERROR"
+      ? COLORS.danger
+      : entry.level === "SUCCESS"
+      ? COLORS.success
+      : entry.level === "WARN"
+      ? COLORS.warn
+      : COLORS.textSub;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        gap: 10,
+        padding: "2px 0",
+        animation: "slide-in-left 0.2s ease",
+        borderBottom: `1px solid ${COLORS.border}33`,
+      }}
+    >
+      <span style={{ color: COLORS.textDim, flexShrink: 0, fontSize: 10 }}>
+        {entry.time.slice(11)}
+      </span>
+      <span
+        style={{
+          color: levelColor,
+          flexShrink: 0,
+          fontSize: 9,
+          letterSpacing: "0.1em",
+          fontWeight: 700,
+          minWidth: 52,
+          textTransform: "uppercase",
+        }}
+      >
+        {entry.level}
+      </span>
+      <span style={{ color: entry.level === "ERROR" ? COLORS.danger : entry.level === "SUCCESS" ? COLORS.success : COLORS.text, wordBreak: "break-all" }}>
+        {entry.msg}
+      </span>
+    </div>
+  );
+}
+
+function CycleBadge({ cycle }) {
+  const pct = Math.round(
+    (cycle.sections.filter((s) => s.status === "done").length / cycle.sections.length) * 100
+  );
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "6px 10px",
+        background: COLORS.surface,
+        border: `1px solid ${cycle.status === "success" ? COLORS.successDim : COLORS.dangerDim}`,
+        borderRadius: 6,
+        animation: "slide-in-up 0.25s ease",
+      }}
+    >
+      <span style={{ color: cycle.status === "success" ? COLORS.success : COLORS.danger, fontSize: 12 }}>
+        {cycle.status === "success" ? "✓" : "✗"}
+      </span>
+      <span style={{ color: COLORS.textSub, fontSize: 10 }}>{cycle.time.slice(11)}</span>
+      <span style={{ color: COLORS.text, fontSize: 11 }}>{cycle.duration}ms</span>
+      <div style={{ flex: 1, height: 3, background: COLORS.border, borderRadius: 2, overflow: "hidden" }}>
+        <div
+          style={{
+            height: "100%",
+            width: `${pct}%`,
+            background: cycle.status === "success" ? COLORS.success : COLORS.warn,
+          }}
+        />
+      </div>
+      <span style={{ color: COLORS.textDim, fontSize: 10 }}>{pct}%</span>
+    </div>
+  );
+}
+
+function GlobalHealthBar({ workflows }) {
+  const avg = Math.round(workflows.reduce((s, w) => s + w.health, 0) / workflows.length);
+  const running = workflows.filter((w) => w.status === "running").length;
+  const errors = workflows.filter((w) => w.status === "error").length;
+  const totalCycles = workflows.reduce((s, w) => s + w.cycleCount, 0);
+
+  return (
+    <div
+      style={{
+        background: COLORS.surface,
+        border: `1px solid ${COLORS.border}`,
+        borderRadius: 8,
+        padding: "14px 20px",
+        display: "flex",
+        gap: 32,
+        alignItems: "center",
+        marginBottom: 20,
+      }}
+    >
+      <div>
+        <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 22, fontWeight: 800, color: avg >= 80 ? COLORS.accent : avg >= 50 ? COLORS.warn : COLORS.danger }}>
+          {avg}
+          <span style={{ fontSize: 12, color: COLORS.textSub, fontWeight: 400 }}>/100</span>
+        </div>
+        <div style={{ fontSize: 9, color: COLORS.textDim, letterSpacing: "0.1em", textTransform: "uppercase" }}>System Health</div>
+      </div>
+      <HealthBar value={avg} height={6} />
+      <div style={{ display: "flex", gap: 24, flexShrink: 0 }}>
+        <StatChip label="Running" value={running} color={COLORS.accent} />
+        <StatChip label="Errors" value={errors} color={errors > 0 ? COLORS.danger : COLORS.textDim} />
+        <StatChip label="Total Cycles" value={totalCycles} color={COLORS.info} />
+      </div>
+    </div>
+  );
+}
+
+function StatChip({ label, value, color }) {
+  return (
+    <div style={{ textAlign: "center" }}>
+      <div style={{ fontSize: 18, fontWeight: 700, color, fontFamily: "'Syne', sans-serif" }}>{value}</div>
+      <div style={{ fontSize: 9, color: COLORS.textDim, letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</div>
+    </div>
+  );
+}
+
+// ── Main App ──────────────────────────────────────────────────────────────────
+export default function AutoSyncDashboard() {
+  const [workflows, setWorkflows] = useState(createWorkflowState);
+  const [selected, setSelected] = useState(WORKFLOW_DEFS[0].id);
+  const [activeTab, setActiveTab] = useState("sections"); // sections | logs | cycles
+  const [paused, setPaused] = useState(false);
+  const [tick, setTick] = useState(0);
+  const logsEndRef = useRef(null);
+  const timerRefs = useRef({});
+  const abortRefs = useRef({});
+  const pausedRef = useRef(false);
+
+  pausedRef.current = paused;
+
+  // Tick for countdown display
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Auto-scroll logs
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [workflows]);
+
+  // Scheduler
+  const scheduleWorkflow = useCallback((wfId) => {
+    const def = WORKFLOW_DEFS.find((d) => d.id === wfId);
+    if (!def) return;
+
+    const run = async () => {
+      if (pausedRef.current) {
+        timerRefs.current[wfId] = setTimeout(run, 1000);
+        return;
+      }
+
+      // Check if this workflow is already running
+      setWorkflows((prev) => {
+        const w = prev.find((x) => x.id === wfId);
+        if (w?.status === "running") return prev;
+        return prev;
+      });
+
+      const ctrl = new AbortController();
+      abortRefs.current[wfId] = ctrl;
+
+      await runWorkflowCycle(wfId, setWorkflows, ctrl.signal);
+
+      setWorkflows((prev) =>
+        prev.map((w) => (w.id === wfId ? { ...w, nextRun: Date.now() + def.intervalMs } : w))
+      );
+
+      timerRefs.current[wfId] = setTimeout(run, def.intervalMs);
+    };
+
+    const w = WORKFLOW_DEFS.find((d) => d.id === wfId);
+    const initial = w ? Math.random() * w.intervalMs * 0.5 : 2000;
+    timerRefs.current[wfId] = setTimeout(run, initial);
+  }, []);
+
+  useEffect(() => {
+    WORKFLOW_DEFS.forEach((def) => scheduleWorkflow(def.id));
+    return () => {
+      Object.values(timerRefs.current).forEach(clearTimeout);
+      Object.values(abortRefs.current).forEach((c) => c.abort());
+    };
+  }, [scheduleWorkflow]);
+
+  const selectedWf = workflows.find((w) => w.id === selected);
+
+  const triggerNow = (wfId) => {
+    const def = WORKFLOW_DEFS.find((d) => d.id === wfId);
+    if (!def) return;
+    clearTimeout(timerRefs.current[wfId]);
+    abortRefs.current[wfId]?.abort();
+
+    const ctrl = new AbortController();
+    abortRefs.current[wfId] = ctrl;
+    runWorkflowCycle(wfId, setWorkflows, ctrl.signal).then(() => {
+      setWorkflows((prev) =>
+        prev.map((w) => (w.id === wfId ? { ...w, nextRun: Date.now() + def.intervalMs } : w))
+      );
+      timerRefs.current[wfId] = setTimeout(() => triggerNow(wfId), def.intervalMs);
+    });
+  };
+
+  return (
+    <>
+      <style>{globalStyle}</style>
+      <div
+        style={{
+          minHeight: "100vh",
+          background: COLORS.bg,
+          display: "flex",
+          flexDirection: "column",
+          padding: "0 0 40px",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            background: COLORS.surface,
+            borderBottom: `1px solid ${COLORS.border}`,
+            padding: "12px 24px",
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            position: "sticky",
+            top: 0,
+            zIndex: 100,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                border: `2px solid ${COLORS.accent}`,
+                borderRadius: 6,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 14,
+                color: COLORS.accent,
+                fontWeight: 800,
+              }}
+            >
+              ⟳
+            </div>
+            <span
+              style={{
+                fontFamily: "'Syne', sans-serif",
+                fontSize: 16,
+                fontWeight: 800,
+                color: COLORS.text,
+                letterSpacing: "0.04em",
+              }}
+            >
+              AUTO-SYNC ENGINE
+            </span>
+            <span
+              style={{
+                fontSize: 9,
+                color: COLORS.textDim,
+                letterSpacing: "0.1em",
+                fontWeight: 600,
+                background: COLORS.surfaceAlt,
+                padding: "2px 6px",
+                borderRadius: 3,
+                border: `1px solid ${COLORS.border}`,
+              }}
+            >
+              v2.0
+            </span>
+          </div>
+
+          <div style={{ flex: 1 }} />
+
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <span
+              style={{
+                fontSize: 10,
+                color: paused ? COLORS.warn : COLORS.accent,
+                letterSpacing: "0.08em",
+                animation: paused ? "none" : "blink 2s ease infinite",
+              }}
+            >
+              {paused ? "● PAUSED" : "● LIVE"}
+            </span>
+            <button
+              onClick={() => setPaused((p) => !p)}
+              style={{
+                background: paused ? COLORS.warnDim : COLORS.accentDim,
+                border: `1px solid ${paused ? COLORS.warn : COLORS.accent}44`,
+                color: paused ? COLORS.warn : COLORS.accent,
+                padding: "5px 14px",
+                borderRadius: 4,
+                cursor: "pointer",
+                fontSize: 11,
+                fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: "0.05em",
+                fontWeight: 600,
+              }}
+            >
+              {paused ? "RESUME" : "PAUSE"}
+            </button>
+          </div>
+        </div>
+
+        <div style={{ padding: "20px 24px", flex: 1 }}>
+          {/* Global Health */}
+          <GlobalHealthBar workflows={workflows} />
+
+          <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 20, height: "calc(100vh - 220px)", minHeight: 500 }}>
+            {/* Left: Workflow List */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, overflowY: "auto" }}>
+              <div
+                style={{
+                  fontSize: 9,
+                  color: COLORS.textDim,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  fontWeight: 700,
+                  marginBottom: 4,
+                }}
+              >
+                Workflows ({WORKFLOW_DEFS.length})
+              </div>
+              {workflows.map((wf) => (
+                <WorkflowCard
+                  key={wf.id}
+                  wf={wf}
+                  active={selected === wf.id}
+                  onClick={() => setSelected(wf.id)}
+                />
+              ))}
+            </div>
+
+            {/* Right: Detail Panel */}
+            {selectedWf && (
+              <div
+                style={{
+                  background: COLORS.surface,
+                  border: `1px solid ${COLORS.border}`,
+                  borderRadius: 8,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                }}
+              >
+                {/* Detail Header */}
+                <div
+                  style={{
+                    padding: "14px 20px",
+                    borderBottom: `1px solid ${COLORS.border}`,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    flexShrink: 0,
+                  }}
+                >
+                  <span style={{ fontSize: 20, color: selectedWf.color }}>{selectedWf.icon}</span>
+                  <div>
+                    <div
+                      style={{
+                        fontFamily: "'Syne', sans-serif",
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: COLORS.text,
+                      }}
+                    >
+                      {selectedWf.name}
+                    </div>
+                    <div style={{ fontSize: 10, color: COLORS.textDim, letterSpacing: "0.08em" }}>
+                      Priority: <span style={{ color: selectedWf.priority === "CRITICAL" ? COLORS.danger : selectedWf.priority === "HIGH" ? COLORS.warn : selectedWf.priority === "MEDIUM" ? COLORS.info : COLORS.textSub }}>{selectedWf.priority}</span>
+                      &nbsp;·&nbsp;Interval: {selectedWf.intervalMs / 1000}s
+                      &nbsp;·&nbsp;Avg: {selectedWf.avgDuration}ms
+                      &nbsp;·&nbsp;Errors: {selectedWf.errorCount}
+                    </div>
+                  </div>
+                  <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+                    <button
+                      onClick={() => triggerNow(selectedWf.id)}
+                      disabled={selectedWf.status === "running"}
+                      style={{
+                        background: selectedWf.status === "running" ? COLORS.surfaceAlt : `${selectedWf.color}22`,
+                        border: `1px solid ${selectedWf.status === "running" ? COLORS.border : selectedWf.color + "55"}`,
+                        color: selectedWf.status === "running" ? COLORS.textDim : selectedWf.color,
+                        padding: "5px 14px",
+                        borderRadius: 4,
+                        cursor: selectedWf.status === "running" ? "not-allowed" : "pointer",
+                        fontSize: 11,
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontWeight: 600,
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      {selectedWf.status === "running" ? "RUNNING…" : "▶ TRIGGER NOW"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tabs */}
+                <div
+                  style={{
+                    display: "flex",
+                    borderBottom: `1px solid ${COLORS.border}`,
+                    flexShrink: 0,
+                  }}
+                >
+                  {["sections", "logs", "cycles"].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      style={{
+                        padding: "10px 20px",
+                        background: "none",
+                        border: "none",
+                        borderBottom: `2px solid ${activeTab === tab ? selectedWf.color : "transparent"}`,
+                        color: activeTab === tab ? selectedWf.color : COLORS.textSub,
+                        cursor: "pointer",
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: 11,
+                        letterSpacing: "0.08em",
+                        fontWeight: activeTab === tab ? 700 : 400,
+                        textTransform: "uppercase",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      {tab}
+                      {tab === "logs" && (
+                        <span
+                          style={{
+                            marginLeft: 6,
+                            fontSize: 9,
+                            background: `${selectedWf.color}22`,
+                            color: selectedWf.color,
+                            padding: "1px 5px",
+                            borderRadius: 3,
+                          }}
+                        >
+                          {selectedWf.logs.length}
+                        </span>
+                      )}
+                      {tab === "cycles" && (
+                        <span
+                          style={{
+                            marginLeft: 6,
+                            fontSize: 9,
+                            background: COLORS.surfaceAlt,
+                            color: COLORS.textSub,
+                            padding: "1px 5px",
+                            borderRadius: 3,
+                          }}
+                        >
+                          {selectedWf.cycles.length}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Tab Content */}
+                <div style={{ flex: 1, overflow: "auto", padding: "16px 20px" }}>
+                  {/* SECTIONS TAB */}
+                  {activeTab === "sections" && (
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 9,
+                          color: COLORS.textDim,
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          marginBottom: 12,
+                        }}
+                      >
+                        Pipeline Sections — Live Progress
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {selectedWf.sections.map((section) => (
+                          <SectionPill
+                            key={section}
+                            section={section}
+                            status={selectedWf.sectionProgress[section] || "pending"}
+                            color={selectedWf.color}
+                          />
+                        ))}
+                      </div>
+
+                      {selectedWf.status === "idle" && selectedWf.cycleCount === 0 && (
+                        <div
+                          style={{
+                            marginTop: 24,
+                            padding: "16px",
+                            background: COLORS.surfaceAlt,
+                            borderRadius: 6,
+                            border: `1px dashed ${COLORS.borderBright}`,
+                            textAlign: "center",
+                            color: COLORS.textDim,
+                            fontSize: 11,
+                          }}
+                        >
+                          Waiting for first cycle…
+                        </div>
+                      )}
+
+                      {selectedWf.cycleCount > 0 && (
+                        <div
+                          style={{
+                            marginTop: 20,
+                            padding: "12px 16px",
+                            background: COLORS.surfaceAlt,
+                            borderRadius: 6,
+                            border: `1px solid ${COLORS.border}`,
+                          }}
+                        >
+                          <div style={{ fontSize: 9, color: COLORS.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
+                            Runtime Stats
+                          </div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+                            <Metric label="Health" value={`${selectedWf.health}%`} color={selectedWf.health >= 80 ? COLORS.success : selectedWf.health >= 50 ? COLORS.warn : COLORS.danger} />
+                            <Metric label="Cycles" value={selectedWf.cycleCount} />
+                            <Metric label="Avg Duration" value={`${selectedWf.avgDuration}ms`} />
+                            <Metric label="Errors" value={selectedWf.errorCount} color={selectedWf.errorCount > 0 ? COLORS.danger : COLORS.textSub} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* LOGS TAB */}
+                  {activeTab === "logs" && (
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 9,
+                          color: COLORS.textDim,
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          marginBottom: 10,
+                        }}
+                      >
+                        Execution Log — Last {selectedWf.logs.length} entries
+                      </div>
+                      <div
+                        style={{
+                          background: COLORS.surfaceAlt,
+                          border: `1px solid ${COLORS.border}`,
+                          borderRadius: 6,
+                          padding: "12px",
+                          maxHeight: 420,
+                          overflowY: "auto",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 2,
+                        }}
+                      >
+                        {selectedWf.logs.length === 0 && (
+                          <span style={{ color: COLORS.textDim, fontSize: 11 }}>No logs yet…</span>
+                        )}
+                        {selectedWf.logs.map((entry) => (
+                          <LogLine key={entry.id} entry={entry} />
+                        ))}
+                        <div ref={logsEndRef} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* CYCLES TAB */}
+                  {activeTab === "cycles" && (
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 9,
+                          color: COLORS.textDim,
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          marginBottom: 10,
+                        }}
+                      >
+                        Cycle History — Last {selectedWf.cycles.length} runs
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        {selectedWf.cycles.length === 0 && (
+                          <div
+                            style={{
+                              padding: "20px",
+                              textAlign: "center",
+                              color: COLORS.textDim,
+                              fontSize: 11,
+                              border: `1px dashed ${COLORS.border}`,
+                              borderRadius: 6,
+                            }}
+                          >
+                            No cycles completed yet
+                          </div>
+                        )}
+                        {selectedWf.cycles.map((cycle) => (
+                          <CycleBadge key={cycle.id} cycle={cycle} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            padding: "8px 24px",
+            borderTop: `1px solid ${COLORS.border}`,
+            display: "flex",
+            gap: 20,
+            alignItems: "center",
+            background: COLORS.surface,
+            marginTop: 20,
+          }}
+        >
+          {workflows.map((wf) => (
+            <div key={wf.id} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <StatusDot status={wf.status} color={wf.color} />
+              <span style={{ fontSize: 10, color: COLORS.textDim }}>{wf.name}</span>
+            </div>
+          ))}
+          <div style={{ marginLeft: "auto", fontSize: 10, color: COLORS.textDim, letterSpacing: "0.06em" }}>
+            AUTO-SYNC ENGINE · WORKFLOW ORCHESTRATOR
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
