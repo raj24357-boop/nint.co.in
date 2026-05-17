@@ -1,685 +1,851 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Best AI Agents for Software Development 2026 | NINT.CO.IN</title>
+<meta name="description" content="Best AI Coding Agents ranked by benchmarks: Claude Code, OpenAI Codex, Cursor, Gemini CLI, GitHub Copilot and more. A benchmark-driven look at the 2026 AI coding agent landscape.">
+<meta property="og:title" content="Best AI Agents for Software Development Ranked 2026 | NINT.CO.IN">
+<meta property="og:description" content="Benchmark-driven ranking of the best AI coding agents in 2026. Claude Code, Codex, Cursor, Gemini CLI and more.">
+<meta name="keywords" content="AI coding agents 2026, Claude Code, OpenAI Codex, Cursor AI, Gemini CLI, GitHub Copilot, SWE-bench, AI software development">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-// ── Palette & Theme ───────────────────────────────────────────────────────────
-const COLORS = {
-  bg: "#0a0c10",
-  surface: "#111318",
-  surfaceAlt: "#161b22",
-  border: "#21262d",
-  borderBright: "#30363d",
-  accent: "#00d4aa",
-  accentDim: "#00d4aa22",
-  accentGlow: "#00d4aa44",
-  warn: "#f0a000",
-  warnDim: "#f0a00022",
-  danger: "#e05252",
-  dangerDim: "#e0525222",
-  info: "#4d9de0",
-  infoDim: "#4d9de022",
-  success: "#3fb950",
-  successDim: "#3fb95022",
-  muted: "#484f58",
-  text: "#e6edf3",
-  textSub: "#8b949e",
-  textDim: "#484f58",
-};
-
-// ── Utilities ─────────────────────────────────────────────────────────────────
-const uid = () => Math.random().toString(36).slice(2, 9);
-const ts = () => new Date().toISOString().replace("T", " ").slice(0, 23);
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-
-// ── Workflow Definitions ──────────────────────────────────────────────────────
-const WORKFLOW_DEFS = [
-  {
-    id: "schema-sync",
-    name: "Schema Sync",
-    icon: "⬡",
-    color: COLORS.accent,
-    sections: ["fetch-schema", "diff-analysis", "migration-gen", "apply-patch"],
-    intervalMs: 12000,
-    priority: "CRITICAL",
-  },
-  {
-    id: "data-pipeline",
-    name: "Data Pipeline",
-    icon: "⟿",
-    color: COLORS.info,
-    sections: ["ingest", "transform", "validate", "load"],
-    intervalMs: 8000,
-    priority: "HIGH",
-  },
-  {
-    id: "health-probe",
-    name: "Health Monitor",
-    icon: "◈",
-    color: COLORS.success,
-    sections: ["ping-services", "check-latency", "eval-thresholds", "report"],
-    intervalMs: 5000,
-    priority: "MEDIUM",
-  },
-  {
-    id: "config-drift",
-    name: "Config Drift Detector",
-    icon: "⟁",
-    color: COLORS.warn,
-    sections: ["snapshot", "compare", "reconcile", "notify"],
-    intervalMs: 15000,
-    priority: "HIGH",
-  },
-  {
-    id: "cache-warm",
-    name: "Cache Warmer",
-    icon: "⬡",
-    color: COLORS.info,
-    sections: ["collect-keys", "priority-sort", "prefetch", "verify"],
-    intervalMs: 20000,
-    priority: "LOW",
-  },
-];
-
-const SECTION_LABELS = {
-  "fetch-schema": "Fetch Remote Schema",
-  "diff-analysis": "Diff Analysis",
-  "migration-gen": "Generate Migration",
-  "apply-patch": "Apply Patch",
-  ingest: "Ingest Source Data",
-  transform: "Transform Records",
-  validate: "Validate Output",
-  load: "Load to Target",
-  "ping-services": "Ping Services",
-  "check-latency": "Check Latency",
-  "eval-thresholds": "Eval Thresholds",
-  report: "Emit Report",
-  snapshot: "Capture Snapshot",
-  compare: "Compare State",
-  reconcile: "Reconcile Drift",
-  notify: "Send Notifications",
-  "collect-keys": "Collect Cache Keys",
-  "priority-sort": "Priority Sort",
-  prefetch: "Prefetch Data",
-  verify: "Verify Cache",
-};
-
-const LOG_TEMPLATES = {
-  "fetch-schema": [
-    "Connecting to remote schema registry...",
-    "Fetching schema v{v} from endpoint",
-    "Received {n} type definitions",
-    "Schema checksum: {h}",
-  ],
-  "diff-analysis": [
-    "Running 3-way diff against baseline",
-    "Detected {n} field additions, {m} removals",
-    "Conflict resolution: MERGE_LATEST strategy",
-    "Diff complete — delta score {d}",
-  ],
-  "migration-gen": [
-    "Generating migration script...",
-    "Script contains {n} statements",
-    "Estimated execution: {t}ms",
-    "Migration staged for review",
-  ],
-  "apply-patch": [
-    "Acquiring schema write lock",
-    "Applying {n} patch operations",
-    "Committing transaction",
-    "Lock released — patch applied ✓",
-  ],
-  ingest: [
-    "Opening data stream from source",
-    "Received batch #{b} — {n} records",
-    "Throughput: {r} rec/s",
-    "Batch checksum verified",
-  ],
-  transform: [
-    "Applying {n} transform rules",
-    "Field mapping: {f} columns remapped",
-    "Null coercion applied to {n} fields",
-    "Transform pipeline complete",
-  ],
-  validate: [
-    "Running schema validation",
-    "{n} records passed, {m} flagged",
-    "Applying correction heuristics",
-    "Validation score: {s}%",
-  ],
-  load: [
-    "Opening write channel to target",
-    "Flushing {n} records",
-    "Write committed — {t}ms elapsed",
-    "Target acknowledged receipt",
-  ],
-  "ping-services": [
-    "Pinging {n} registered endpoints",
-    "All primary nodes responding",
-    "2 edge nodes degraded — logged",
-    "Ping sweep complete",
-  ],
-  "check-latency": [
-    "Sampling p50/p95/p99 latency",
-    "p50={a}ms  p95={b}ms  p99={c}ms",
-    "Baseline delta: {d}%",
-    "Latency within acceptable bounds",
-  ],
-  "eval-thresholds": [
-    "Evaluating {n} alert thresholds",
-    "CPU threshold: {c}% (limit {l}%)",
-    "Memory pressure: nominal",
-    "No threshold breaches detected",
-  ],
-  report: [
-    "Compiling health snapshot",
-    "Overall health score: {s}/100",
-    "Emitting metrics to aggregator",
-    "Report dispatched",
-  ],
-  snapshot: [
-    "Capturing config snapshot #{n}",
-    "Serializing {n} config keys",
-    "Snapshot stored at {h}",
-    "Snapshot fingerprint: {f}",
-  ],
-  compare: [
-    "Comparing against last snapshot",
-    "Found {n} drift keys",
-    "Drift severity: {s}",
-    "Comparison complete",
-  ],
-  reconcile: [
-    "Reconciling {n} drifted values",
-    "Applying authoritative config",
-    "{n} keys corrected, {m} skipped",
-    "Reconciliation committed",
-  ],
-  notify: [
-    "Preparing notification payload",
-    "Routing to {n} subscribers",
-    "Delivery confirmed: {n}/{m}",
-    "Notification cycle closed",
-  ],
-  "collect-keys": [
-    "Scanning cache namespace",
-    "Identified {n} cold keys",
-    "Priority queue built — {n} entries",
-    "Key collection complete",
-  ],
-  "priority-sort": [
-    "Sorting by access frequency",
-    "Top {n} keys flagged for prefetch",
-    "LRU eviction candidates: {m}",
-    "Sort complete",
-  ],
-  prefetch: [
-    "Issuing prefetch for {n} keys",
-    "Batch {b}/{t} loaded",
-    "Cache fill rate: {r}%",
-    "Prefetch complete",
-  ],
-  verify: [
-    "Verifying cache consistency",
-    "{n} keys confirmed warm",
-    "Hit-rate improvement: +{d}%",
-    "Cache verification passed ✓",
-  ],
-};
-
-function renderLog(section) {
-  const templates = LOG_TEMPLATES[section] || ["Processing..."];
-  const r = (n, m = 100) => Math.floor(Math.random() * m + n);
-  return templates[Math.floor(Math.random() * templates.length)]
-    .replace("{v}", `${r(1, 9)}.${r(0, 99)}.${r(0, 999)}`)
-    .replace("{n}", r(2, 50))
-    .replace("{m}", r(1, 20))
-    .replace("{h}", Math.random().toString(16).slice(2, 10))
-    .replace("{f}", Math.random().toString(16).slice(2, 10))
-    .replace("{t}", r(10, 500))
-    .replace("{d}", r(1, 30))
-    .replace("{b}", r(1, 20))
-    .replace("{r}", r(100, 9999))
-    .replace("{s}", r(75, 100))
-    .replace("{l}", r(70, 95))
-    .replace("{c}", r(10, 80))
-    .replace("{a}", r(5, 50))
-    .replace("{b}", r(50, 150))
-    .replace("{c}", r(150, 400));
+<style>
+:root {
+  --ink: #0d0d0d;
+  --paper: #faf8f4;
+  --cream: #f4f0e8;
+  --rule: #d4cfc5;
+  --accent: #c8391a;
+  --accent2: #1a4dc8;
+  --gold: #b8860b;
+  --muted: #6b6560;
+  --light-muted: #9b9590;
+  --surface: #ffffff;
+  --tag-bg: #0d0d0d;
+  --ranking-1: #c8391a;
+  --ranking-2: #1a4dc8;
+  --ranking-3: #2a7a3a;
+  --ranking-4: #7a2a6a;
+  --ranking-5: #c87a1a;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
 }
 
-// ── State Machine ─────────────────────────────────────────────────────────────
-function createWorkflowState() {
-  return WORKFLOW_DEFS.map((def) => ({
-    ...def,
-    status: "idle",
-    cycleCount: 0,
-    lastRun: null,
-    nextRun: Date.now() + def.intervalMs,
-    currentSection: null,
-    sectionProgress: {},
-    logs: [],
-    cycles: [],
-    health: 100,
-    errorCount: 0,
-    avgDuration: 0,
-    totalDuration: 0,
-  }));
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
 }
 
-// ── Simulation Engine ─────────────────────────────────────────────────────────
-async function runWorkflowCycle(wfId, setState, signal) {
-  const def = WORKFLOW_DEFS.find((d) => d.id === wfId);
-  if (!def) return;
+/* ─── SCROLLBAR ──────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-thumb { background: var(--rule); }
 
-  const cycleId = uid();
-  const cycleStart = Date.now();
-  const sectionResults = [];
-
-  setState((prev) =>
-    prev.map((w) =>
-      w.id !== wfId
-        ? w
-        : {
-            ...w,
-            status: "running",
-            currentSection: null,
-            sectionProgress: {},
-            logs: [
-              ...w.logs.slice(-200),
-              { id: uid(), time: ts(), level: "INFO", msg: `── Cycle #${w.cycleCount + 1} started ──`, section: null },
-            ],
-          }
-    )
-  );
-
-  for (const section of def.sections) {
-    if (signal.aborted) return;
-
-    const sectionStart = Date.now();
-    const shouldFail = Math.random() < 0.06; // 6% failure rate per section
-
-    setState((prev) =>
-      prev.map((w) =>
-        w.id !== wfId
-          ? w
-          : {
-              ...w,
-              currentSection: section,
-              sectionProgress: { ...w.sectionProgress, [section]: "running" },
-              logs: [
-                ...w.logs.slice(-200),
-                { id: uid(), time: ts(), level: "INFO", msg: `→ ${SECTION_LABELS[section]}`, section },
-              ],
-            }
-      )
-    );
-
-    // Emit 2-4 log lines per section with timing
-    const logCount = 2 + Math.floor(Math.random() * 3);
-    for (let i = 0; i < logCount; i++) {
-      if (signal.aborted) return;
-      await sleep(200 + Math.random() * 400);
-      const msg = renderLog(section);
-      const level = shouldFail && i === logCount - 1 ? "ERROR" : "INFO";
-      setState((prev) =>
-        prev.map((w) =>
-          w.id !== wfId
-            ? w
-            : { ...w, logs: [...w.logs.slice(-200), { id: uid(), time: ts(), level, msg, section }] }
-        )
-      );
-    }
-
-    const sectionDuration = Date.now() - sectionStart;
-
-    if (shouldFail) {
-      sectionResults.push({ section, status: "failed", duration: sectionDuration });
-      setState((prev) =>
-        prev.map((w) =>
-          w.id !== wfId
-            ? w
-            : {
-                ...w,
-                status: "error",
-                currentSection: null,
-                errorCount: w.errorCount + 1,
-                health: clamp(w.health - 15, 0, 100),
-                sectionProgress: { ...w.sectionProgress, [section]: "failed" },
-                logs: [
-                  ...w.logs.slice(-200),
-                  { id: uid(), time: ts(), level: "ERROR", msg: `✗ Section failed: ${SECTION_LABELS[section]}`, section },
-                ],
-              }
-        )
-      );
-      break;
-    } else {
-      sectionResults.push({ section, status: "done", duration: sectionDuration });
-      setState((prev) =>
-        prev.map((w) =>
-          w.id !== wfId
-            ? w
-            : {
-                ...w,
-                sectionProgress: { ...w.sectionProgress, [section]: "done" },
-                health: clamp(w.health + 1, 0, 100),
-              }
-        )
-      );
-    }
-
-    await sleep(100);
-  }
-
-  if (signal.aborted) return;
-
-  const cycleDuration = Date.now() - cycleStart;
-  const allPassed = sectionResults.every((r) => r.status === "done");
-  const cycleRecord = {
-    id: cycleId,
-    time: ts(),
-    duration: cycleDuration,
-    status: allPassed ? "success" : "failed",
-    sections: sectionResults,
-  };
-
-  setState((prev) =>
-    prev.map((w) => {
-      if (w.id !== wfId) return w;
-      const newTotal = w.totalDuration + cycleDuration;
-      const newCount = w.cycleCount + 1;
-      return {
-        ...w,
-        status: allPassed ? "idle" : "error",
-        currentSection: null,
-        cycleCount: newCount,
-        lastRun: ts(),
-        nextRun: Date.now() + def.intervalMs,
-        avgDuration: Math.round(newTotal / newCount),
-        totalDuration: newTotal,
-        cycles: [cycleRecord, ...w.cycles].slice(0, 50),
-        logs: [
-          ...w.logs.slice(-200),
-          {
-            id: uid(),
-            time: ts(),
-            level: allPassed ? "SUCCESS" : "ERROR",
-            msg: allPassed
-              ? `✓ Cycle #${newCount} complete — ${cycleDuration}ms`
-              : `✗ Cycle #${newCount} aborted after ${cycleDuration}ms`,
-            section: null,
-          },
-        ],
-      };
-    })
-  );
+/* ─── ANIMATIONS ─────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes tickerScroll {
+  0% { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-// ── Components ────────────────────────────────────────────────────────────────
-
-const css = (strings, ...vals) => strings.reduce((acc, s, i) => acc + s + (vals[i] ?? ""), "");
-
-const globalStyle = css`
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: #0a0c10;
-    color: #e6edf3;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    line-height: 1.6;
-    overflow-x: hidden;
-  }
-
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: #484f58; }
-
-  @keyframes pulse-ring {
-    0% { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(2); }
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
-  @keyframes slide-in-left {
-    from { opacity: 0; transform: translateX(-12px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  @keyframes slide-in-up {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes bar-fill {
-    from { width: 0; }
-  }
-  @keyframes glow-pulse {
-    0%,100% { box-shadow: 0 0 8px #00d4aa33; }
-    50% { box-shadow: 0 0 20px #00d4aa66; }
-  }
-`;
-
-function StatusDot({ status, color }) {
-  const map = {
-    running: COLORS.accent,
-    idle: COLORS.muted,
-    error: COLORS.danger,
-    success: COLORS.success,
-  };
-  const c = color || map[status] || COLORS.muted;
-  return (
-    <span style={{ position: "relative", display: "inline-block", width: 10, height: 10 }}>
-      <span
-        style={{
-          position: "absolute",
-          inset: 0,
-          borderRadius: "50%",
-          background: c,
-          opacity: status === "running" ? 1 : 0.7,
-        }}
-      />
-      {status === "running" && (
-        <span
-          style={{
-            position: "absolute",
-            inset: 0,
-            borderRadius: "50%",
-            background: c,
-            animation: "pulse-ring 1.2s ease-out infinite",
-          }}
-        />
-      )}
-    </span>
-  );
+/* ─── TOP BAR ────────────────────────────────────────────────────── */
+.top-bar {
+  background: var(--ink);
+  color: #fff;
+  padding: 7px 0;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.top-bar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.top-bar-date { color: #aaa; }
+.top-bar-links { display: flex; gap: 20px; }
+.top-bar-links a { color: #ccc; text-decoration: none; transition: color 0.2s; }
+.top-bar-links a:hover { color: #fff; }
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--accent);
+}
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.4s ease infinite;
 }
 
-function HealthBar({ value, height = 4 }) {
-  const color =
-    value >= 80 ? COLORS.success : value >= 50 ? COLORS.warn : COLORS.danger;
-  return (
-    <div
-      style={{
-        height,
-        background: "#21262d",
-        borderRadius: 2,
-        overflow: "hidden",
-        flex: 1,
-      }}
-    >
-      <div
-        style={{
-          height: "100%",
-          width: `${value}%`,
-          background: color,
-          transition: "width 0.6s ease, background 0.4s",
-          animation: "bar-fill 0.8s ease",
-        }}
-      />
-    </div>
-  );
+/* ─── BREAKING TICKER ────────────────────────────────────────────── */
+.ticker-wrap {
+  background: var(--accent);
+  color: #fff;
+  overflow: hidden;
+  padding: 9px 0;
+  position: relative;
+}
+.ticker-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #900;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  z-index: 2;
+  white-space: nowrap;
+}
+.ticker-track {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  animation: tickerScroll 38s linear infinite;
+  white-space: nowrap;
+  padding-left: 180px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.ticker-item::before { content: "▸ "; opacity: 0.7; }
+
+/* ─── MASTHEAD ───────────────────────────────────────────────────── */
+.masthead {
+  background: var(--surface);
+  border-bottom: 3px solid var(--ink);
+  padding: 20px 24px 16px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+}
+.site-name {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1;
+  text-decoration: none;
+}
+.site-name span { color: var(--accent); }
+.site-tagline {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 4px;
+  font-weight: 600;
+}
+.nav-bar {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.nav-bar a {
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  padding: 5px 14px;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.nav-bar a:hover, .nav-bar a.active {
+  background: var(--ink);
+  color: #fff;
 }
 
-function SectionPill({ section, status, color }) {
-  const statusColor =
-    status === "done"
-      ? COLORS.success
-      : status === "running"
-      ? color || COLORS.accent
-      : status === "failed"
-      ? COLORS.danger
-      : COLORS.muted;
+/* ─── AD BANNER TOP ──────────────────────────────────────────────── */
+.ad-zone {
+  background: linear-gradient(135deg, #f0ede8 0%, #e8e4dc 100%);
+  border: 1px dashed #c5bfb5;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--light-muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+}
+.ad-zone::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
+}
+.ad-leaderboard { height: 90px; margin: 16px auto; max-width: 728px; }
+.ad-rectangle { height: 250px; width: 100%; }
+.ad-sidebar { height: 600px; width: 100%; }
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "4px 10px",
-        borderRadius: 4,
-        border: `1px solid ${statusColor}33`,
-        background: `${statusColor}11`,
-        animation: status === "running" ? "glow-pulse 1.5s ease infinite" : "none",
-        transition: "all 0.3s ease",
-      }}
-    >
-      <StatusDot status={status === "done" ? "success" : status === "failed" ? "error" : status} />
-      <span style={{ color: statusColor, fontSize: 11, letterSpacing: "0.04em" }}>
-        {SECTION_LABELS[section] || section}
-      </span>
-      {status === "done" && (
-        <span style={{ color: COLORS.success, fontSize: 10, marginLeft: "auto" }}>✓</span>
-      )}
-      {status === "failed" && (
-        <span style={{ color: COLORS.danger, fontSize: 10, marginLeft: "auto" }}>✗</span>
-      )}
-      {status === "running" && (
-        <span
-          style={{
-            marginLeft: "auto",
-            width: 8,
-            height: 8,
-            border: `1.5px solid ${color || COLORS.accent}`,
-            borderTopColor: "transparent",
-            borderRadius: "50%",
-            animation: "spin 0.8s linear infinite",
-            display: "inline-block",
-          }}
-        />
-      )}
-    </div>
-  );
+/* ─── LAYOUT ─────────────────────────────────────────────────────── */
+.page-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
-function WorkflowCard({ wf, onClick, active }) {
-  const lastCycle = wf.cycles[0];
-  const successRate =
-    wf.cycles.length === 0
-      ? 100
-      : Math.round((wf.cycles.filter((c) => c.status === "success").length / wf.cycles.length) * 100);
+/* ─── HERO SECTION ───────────────────────────────────────────────── */
+.hero {
+  padding: 48px 0 0;
+  animation: fadeUp 0.7s ease both;
+}
+.category-crumb {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.crumb-tag {
+  display: inline-block;
+  background: var(--tag-bg);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 3px;
+}
+.crumb-tag.red { background: var(--accent); }
+.crumb-tag.blue { background: var(--accent2); }
+.crumb-sep { color: var(--light-muted); font-size: 12px; }
 
-  const timeToNext = Math.max(0, wf.nextRun - Date.now());
-  const countdownSec = Math.ceil(timeToNext / 1000);
-
-  return (
-    <div
-      onClick={onClick}
-      style={{
-        background: active ? COLORS.surfaceAlt : COLORS.surface,
-        border: `1px solid ${active ? wf.color + "55" : COLORS.border}`,
-        borderRadius: 8,
-        padding: "14px 16px",
-        cursor: "pointer",
-        transition: "all 0.2s ease",
-        animation: "slide-in-up 0.3s ease",
-        boxShadow: active ? `0 0 20px ${wf.color}22` : "none",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {active && (
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: 3,
-            background: wf.color,
-            borderRadius: "0 2px 2px 0",
-          }}
-        />
-      )}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-        <span style={{ fontSize: 16, color: wf.color }}>{wf.icon}</span>
-        <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 700, color: COLORS.text, letterSpacing: "0.02em" }}>
-          {wf.name}
-        </span>
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6 }}>
-          <StatusDot status={wf.status} color={wf.color} />
-          <span
-            style={{
-              fontSize: 9,
-              letterSpacing: "0.12em",
-              color: wf.status === "running" ? wf.color : wf.status === "error" ? COLORS.danger : COLORS.textDim,
-              fontWeight: 600,
-              textTransform: "uppercase",
-            }}
-          >
-            {wf.status}
-          </span>
-        </div>
-      </div>
-
-      <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
-        <HealthBar value={wf.health} height={3} />
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-        <Metric label="Cycles" value={wf.cycleCount} />
-        <Metric label="Success" value={`${successRate}%`} color={successRate >= 90 ? COLORS.success : successRate >= 70 ? COLORS.warn : COLORS.danger} />
-        <Metric label={wf.status === "running" ? "Section" : "Next in"} value={wf.status === "running" && wf.currentSection ? (SECTION_LABELS[wf.currentSection] || wf.currentSection).slice(0, 10) + "…" : `${countdownSec}s`} color={wf.status === "running" ? wf.color : COLORS.textSub} />
-      </div>
-    </div>
-  );
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 58px);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  max-width: 860px;
+  margin-bottom: 20px;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--accent);
 }
 
-function Metric({ label, value, color }) {
-  return (
-    <div>
-      <div style={{ fontSize: 9, color: COLORS.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 2 }}>{label}</div>
-      <div style={{ fontSize: 13, fontWeight: 600, color: color || COLORS.text }}>{value}</div>
-    </div>
-  );
+.hero-deck {
+  font-size: 19px;
+  line-height: 1.55;
+  color: #2a2a2a;
+  max-width: 700px;
+  font-weight: 400;
+  margin-bottom: 24px;
+  border-left: 4px solid var(--accent);
+  padding-left: 20px;
 }
 
-function LogLine({ entry }) {
-  const levelColor =
-    entry.level === "ERROR"
-      ? COLORS.danger
-      : entry.level === "SUCCESS"
-      ? COLORS.success
-      : entry.level === "WARN"
-      ? COLORS.warn
-      : COLORS.textSub;
+.byline {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 32px;
+}
+.byline-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, #8a2010 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.byline-info { flex: 1; }
+.byline-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+}
+.byline-meta {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+.share-row {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  border: none;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.share-btn.tw { background: #1da1f2; color: #fff; }
+.share-btn.li { background: #0077b5; color: #fff; }
+.share-btn.cp { background: var(--ink); color: #fff; }
+.share-btn:hover { opacity: 0.85; transform: translateY(-1px); }
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        gap: 10,
-        padding: "2px 0",
-        animation: "slide-in-left 0.2s ease",
-        borderBottom: `1px solid ${COLORS.border}33`,
-      }}
-    >
-      <span style={{ color: COLORS.textDim, flexShrink: 0, fontSize: 10 }}>
-        {entry.time.slice(11)}
-      </span>
-      <span
-        style={{
-          color: levelColor,
-          flexShrink: 0,
-   
+/* ─── HERO STATS BAND ────────────────────────────────────────────── */
+.stats-band {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+.stat-cell {
+  background: var(--surface);
+  padding: 18px 20px;
+  text-align: center;
+}
+.stat-number {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* ─── CONTENT GRID ───────────────────────────────────────────────── */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 48px;
+  align-items: start;
+  padding-bottom: 80px;
+}
+
+/* ─── ARTICLE BODY ───────────────────────────────────────────────── */
+.article-body { min-width: 0; }
+
+.article-body p {
+  font-size: 17px;
+  line-height: 1.75;
+  color: #1a1a1a;
+  margin-bottom: 22px;
+  font-weight: 300;
+}
+
+.article-body strong { font-weight: 700; color: var(--ink); }
+
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 48px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+.section-heading {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 20px;
+  letter-spacing: -0.015em;
+}
+
+/* ─── CALLOUT BOX ────────────────────────────────────────────────── */
+.callout {
+  background: #fff8f0;
+  border-left: 5px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  padding: 20px 24px;
+  margin: 32px 0;
+}
+.callout-title {
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.callout p {
+  font-size: 15px !important;
+  color: #3a3020 !important;
+  margin-bottom: 0 !important;
+}
+
+.warning-box {
+  background: #fff5f5;
+  border-left: 5px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 20px 24px;
+  margin: 32px 0;
+}
+.warning-box .callout-title { color: var(--accent); }
+.warning-box p { color: #3a1010 !important; }
+
+/* ─── BENCHMARK TABLE ────────────────────────────────────────────── */
+.bench-table-wrap {
+  overflow-x: auto;
+  margin: 32px 0;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+.bench-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: #fff;
+}
+.bench-table th {
+  background: var(--ink);
+  color: #fff;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.bench-table th:first-child { border-radius: 9px 0 0 0; }
+.bench-table th:last-child { border-radius: 0 9px 0 0; }
+.bench-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  vertical-align: middle;
+}
+.bench-table tr:last-child td { border-bottom: none; }
+.bench-table tr:nth-child(even) td { background: #fafaf8; }
+.bench-table tr:hover td { background: #f5f0e8; }
+.score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.score-bar {
+  height: 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: width 1s ease;
+}
+.rank-badge {
+  display: inline-block;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 26px;
+  font-weight: 800;
+  font-size: 12px;
+  color: #fff;
+  font-family: var(--font-body);
+}
+
+/* ─── AGENT CARDS ────────────────────────────────────────────────── */
+.agent-card {
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 40px 0;
+  background: #fff;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  animation: slideIn 0.5s ease both;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.agent-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+.agent-card-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.agent-rank-num {
+  font-family: var(--font-display);
+  font-size: 72px;
+  font-weight: 900;
+  line-height: 0.85;
+  flex-shrink: 0;
+  opacity: 0.12;
+  color: var(--ink);
+}
+.agent-header-info { flex: 1; }
+.agent-name {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.agent-company {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.agent-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.agent-tag {
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.tag-best { background: #e8f5e8; color: #2a7a3a; }
+.tag-fast { background: #e8f0ff; color: #1a4dc8; }
+.tag-free { background: #fff8e8; color: #b8860b; }
+.tag-terminal { background: #ffe8e8; color: #c8391a; }
+.tag-enterprise { background: #f0e8ff; color: #6a2a8a; }
+.tag-ide { background: #e8fff0; color: #1a6a3a; }
+
+.agent-benchmarks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.bench-cell {
+  background: #fff;
+  padding: 16px 20px;
+  text-align: center;
+}
+.bench-value {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.bench-name {
+  font-size: 10px;
+  color: var(--light-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.bench-note {
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.agent-body {
+  padding: 24px 28px;
+}
+.agent-body p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #2a2a2a;
+  margin-bottom: 16px;
+}
+.agent-body p:last-child { margin-bottom: 0; }
+
+.agent-footer {
+  padding: 16px 28px;
+  background: #f8f6f2;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.agent-pricing {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.best-for {
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+  flex: 1;
+}
+.best-for strong { color: var(--ink); font-style: normal; }
+
+/* ─── SIDEBAR ────────────────────────────────────────────────────── */
+.sidebar {
+  position: sticky;
+  top: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.sidebar-widget {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.widget-title {
+  background: var(--ink);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+}
+.widget-body { padding: 16px; }
+
+.toc-list { list-style: none; }
+.toc-list li {
+  border-bottom: 1px solid #f0ede8;
+  padding: 0;
+}
+.toc-list li:last-child { border-bottom: none; }
+.toc-list a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.toc-list a:hover { color: var(--accent); padding-left: 4px; }
+.toc-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.trending-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0ede8;
+}
+.trending-item:last-child { border-bottom: none; }
+.trending-num {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--rule);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 28px;
+}
+.trending-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.4;
+}
+.trending-meta {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.newsletter-widget { background: var(--ink); color: #fff; }
+.newsletter-widget .widget-title { background: var(--accent); }
+.newsletter-body { padding: 20px; }
+.newsletter-body p {
+  font-size: 13px;
+  color: #ccc;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.nl-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 13px;
+  font-family: var(--font-body);
+  margin-bottom: 8px;
+  outline: none;
+}
+.nl-input:focus { border-color: var(--accent); }
+.nl-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.nl-btn:hover { background: #a02a10; }
+
+/* ─── MYTH BUSTER SECTION ────────────────────────────────────────── */
+.myth-section {
+  background: var(--ink);
+  color: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  margin: 40px 0;
+}
+.myth-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: #fff;
+}
+.myth-title span { color: var(--accent); }
+.myth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.myth-item { border-left: 3px solid var(--accent); padding-left: 16px; }
+.myth-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.myth-text { font-size: 14px; color: #ccc; line-height: 1.5; }
+
+/* ─── VERDICT SECTION ────────────────────────────────────────────── */
+.verdict-section {
+  background: linear-gradient(135deg, #fff8f0 0%, #fff0e8 100%);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  padding: 36px 40px;
+  margin: 40px 0;
+}
+.verdict-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--ink);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.verdict-icon { font-size: 32px; }
+.verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.verdict-item {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px 20px;
+  border-left: 4px solid var(--gold);
+}
+.verdict-use { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+.verdict-pick { font-size: 16px; font-weight: 800; color: var(--ink); font-family: var(--font-display); margin-bottom: 4px; }
+.verdict-why { font-size: 13px; color: var(--muted); line-height: 1.4; }
+
+/* ─── FOOTER ─────────────────────────────────────────────────────── */
+footer {
+  background: var(--ink);
+  color: #888;
+  padding: 48px 24px 24px;
+  margin-top: 80px;
+}
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #222;
+  margin-bottom: 24px;
+}
+.footer-logo {
+ 
