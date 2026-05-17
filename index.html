@@ -1,251 +1,685 @@
-<!DOCTYPE html>
-<html lang="te">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NINT - తెలంగాణ లైవ్ ఫీడ్</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;700;900&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Noto Sans Telugu', 'Inter', sans-serif; background-color: #f0f2f5; color: #1c1e21; line-height: 1.5; }
-        header { background: linear-gradient(135deg, #18191a, #242526); text-align: center; padding: 40px 20px; border-bottom: 5px solid #dc2626; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        header h1 { font-size: 3.5em; font-weight: 900; letter-spacing: 3px; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        header p { color: #a0aab4; font-size: 1.1em; margin-top: 8px; font-weight: bold; }
-        .container { max-width: 1300px; margin: 40px auto; padding: 0 20px; }
-        .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
-        .news-card { background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; transition: all 0.3s ease; display: flex; flex-direction: column; }
-        .news-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: #d1d5db; }
-        .news-card img { width: 100%; height: 200px; object-fit: cover; }
-        .news-body { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .news-meta { font-size: 0.85em; color: #dc2626; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; display: block; }
-        .news-card h2 { color: #1c1e21; font-size: 1.35em; font-weight: 800; line-height: 1.4; margin-bottom: 12px; min-height: 2.8em; }
-        .news-card p { color: #4b5563; font-size: 1.02em; line-height: 1.6; margin-bottom: 20px; }
-        
-        .card-actions { display: flex; gap: 12px; width: 100%; margin-top: auto; }
-        .read-more-btn { flex: 1; text-align: center; background-color: #1c1e21; color: white; padding: 12px 10px; text-decoration: none; font-weight: 700; font-size: 0.9em; border-radius: 8px; transition: 0.2s; }
-        .read-more-btn:hover { background-color: #dc2626; }
-        
-        .share-btn { flex: 1; background-color: #25d366; color: white; border: none; padding: 12px 10px; font-weight: 700; font-size: 0.9em; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .share-btn:hover { background-color: #128c7e; }
-        
-        footer { background-color: #18191a; color: #a0aab4; padding: 50px 0 30px 0; margin-top: 60px; border-top: 5px solid #dc2626; }
-        .footer-container { display: grid; grid-template-columns: 2fr 1fr; gap: 40px; max-width: 1300px; margin: 0 auto; padding: 0 20px; text-align: left; }
-        .footer-about h3, .footer-links h3 { color: #ffffff; font-size: 1.3em; margin-bottom: 15px; border-left: 4px solid #dc2626; padding-left: 12px; font-weight: bold; }
-        .footer-about p { font-size: 1.1em; line-height: 1.7; color: #cbd5e1; font-weight: 600; }
-        .footer-links a { color: #a0aab4; text-decoration: none; font-weight: bold; font-size: 1em; display: inline-block; margin: 5px 0; transition: 0.2s; }
-        .footer-links a:hover { color: #dc2626; }
-        .copyright { text-align: center; margin-top: 40px; border-top: 1px solid #242526; padding-top: 25px; font-size: 0.95em; color: #64748b; font-weight: bold; }
-        
-        .custom-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); padding-top: 100px; }
-        .modal-content { background-color: #ffffff; color: #1c1e21; margin: auto; padding: 35px; border-radius: 16px; width: 85%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
-        .modal-content h2 { font-size: 1.8em; margin-bottom: 15px; color: #0f172a; border-bottom: 3px solid #dc2626; padding-bottom: 8px; }
-        .modal-content p { font-size: 1.05em; line-height: 1.7; color: #334155; }
-        .close-modal { color: #64748b; float: right; font-size: 30px; font-weight: bold; cursor: pointer; line-height: 1; margin-top: -10px; }
-        .close-modal:hover { color: #dc2626; }
-    </style>
-</head>
-<body>
+import { useState, useEffect, useRef, useCallback } from "react";
 
-<header>
-    <h1>NINT NEWS</h1>
-    <p>⚡ తెలంగాణ హైపర్-లోకల్ లైవ్ టైమ్-లైన్ డ్యాష్‌బోర్డ్</p>
-</header>
+// ── Palette & Theme ───────────────────────────────────────────────────────────
+const COLORS = {
+  bg: "#0a0c10",
+  surface: "#111318",
+  surfaceAlt: "#161b22",
+  border: "#21262d",
+  borderBright: "#30363d",
+  accent: "#00d4aa",
+  accentDim: "#00d4aa22",
+  accentGlow: "#00d4aa44",
+  warn: "#f0a000",
+  warnDim: "#f0a00022",
+  danger: "#e05252",
+  dangerDim: "#e0525222",
+  info: "#4d9de0",
+  infoDim: "#4d9de022",
+  success: "#3fb950",
+  successDim: "#3fb95022",
+  muted: "#484f58",
+  text: "#e6edf3",
+  textSub: "#8b949e",
+  textDim: "#484f58",
+};
 
-<div class="container">
-    <div class="news-grid">
-        <div class="news-card">
-                <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600" alt="NINT Local">
-                <div class="news-body">
-                    <span class="news-meta">📍 తెలంగాణ | 17-05-2026</span>
-                    <h2>రేవంత్‌కు దేవుడంటే భయం లేదు.. భక్తి లేదు</h2>
-                    <p>రేవంత్‌కు దేవుడంటే భయం లేదు.. భక్తి లేదు...</p>
-                    <div class="card-actions">
-                        <a href="https://news.google.com/rss/articles/CBMiywFBVV95cUxQVzNQTjVieVdDUUFVOGVjUnMyUkJOeFd0OTc1T05fLU9FZHh2WjBSd1Yzd01Ec19sZVZDTEZUUVcyOWZ1bnFqSUc3VHcyWmNnN09wUFRQUk0tMnhmTFhCWG43S0x6eHd5dnJ4UUhrOHlLUW50SDd4WjkzVmtESUgwSnNWeWFWdXl5WlMtcmdxUU5teDNLR0NRTlJsMEc4ME1tTEpMU0p6RFIyUjJKc1VzLU1KNjZnd0pERE4wRnAyZ3NkUHN5VFREakdMSQ?oc=5" target="_blank" class="read-more-btn">చదవండి →</a>
-                        <button class="share-btn" onclick="shareNews('రేవంత్‌కు దేవుడంటే భయం లేదు.. భక్తి లేదు', 'https://news.google.com/rss/articles/CBMiywFBVV95cUxQVzNQTjVieVdDUUFVOGVjUnMyUkJOeFd0OTc1T05fLU9FZHh2WjBSd1Yzd01Ec19sZVZDTEZUUVcyOWZ1bnFqSUc3VHcyWmNnN09wUFRQUk0tMnhmTFhCWG43S0x6eHd5dnJ4UUhrOHlLUW50SDd4WjkzVmtESUgwSnNWeWFWdXl5WlMtcmdxUU5teDNLR0NRTlJsMEc4ME1tTEpMU0p6RFIyUjJKc1VzLU1KNjZnd0pERE4wRnAyZ3NkUHN5VFREakdMSQ?oc=5')">📲 షేర్</button>
-                    </div>
-                </div>
-            </div>
-<div class="news-card">
-                <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600" alt="NINT Local">
-                <div class="news-body">
-                    <span class="news-meta">📍 తెలంగాణ | 17-05-2026</span>
-                    <h2>Harish Rao | లంకె బిందెల కోసమేనా? రేవంత్ రెడ్డిపై హరీష్ రావు సెటైర్లు</h2>
-                    <p>Harish Rao | లంకె బిందెల కోసమేనా? రేవంత్ రెడ్డిపై హరీష్ రావు సెటైర్లు...</p>
-                    <div class="card-actions">
-                        <a href="https://news.google.com/rss/articles/CBMi7gFBVV95cUxNb1puS05OY201WWhFdGNtVTluUFdMZ1d5TXlPbFl5dC12eVRveUZoblZaT1QzUjJ1dVpjbU5jT2hSZm52aDc3VnR1WjZNT04zQ0dxekJpdzFKOE9rOUY1LXJqb3h0QjI5ZFplblBwaGZfRUlzM0lPeHBpSEprdnF2d0FIVmp2MlhEUmVWbG5CeE44SWxPSDZfT1Z3TXJLSkVfTEs1RThXYUxyRmdPdjdrT2RIaUZDVXd4VmJIRzZLMjEzNVk1ZThSMmYzOGd6bjl6blVNaTlHV2I1bUVtM2pITk9vTjBtdlVwclA2bEdn?oc=5" target="_blank" class="read-more-btn">చదవండి →</a>
-                        <button class="share-btn" onclick="shareNews('Harish Rao | లంకె బిందెల కోసమేనా? రేవంత్ రెడ్డిపై హరీష్ రావు సెటైర్లు', 'https://news.google.com/rss/articles/CBMi7gFBVV95cUxNb1puS05OY201WWhFdGNtVTluUFdMZ1d5TXlPbFl5dC12eVRveUZoblZaT1QzUjJ1dVpjbU5jT2hSZm52aDc3VnR1WjZNT04zQ0dxekJpdzFKOE9rOUY1LXJqb3h0QjI5ZFplblBwaGZfRUlzM0lPeHBpSEprdnF2d0FIVmp2MlhEUmVWbG5CeE44SWxPSDZfT1Z3TXJLSkVfTEs1RThXYUxyRmdPdjdrT2RIaUZDVXd4VmJIRzZLMjEzNVk1ZThSMmYzOGd6bjl6blVNaTlHV2I1bUVtM2pITk9vTjBtdlVwclA2bEdn?oc=5')">📲 షేర్</button>
-                    </div>
-                </div>
-            </div>
-<div class="news-card">
-                <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600" alt="NINT Local">
-                <div class="news-body">
-                    <span class="news-meta">📍 తెలంగాణ | 17-05-2026</span>
-                    <h2>‘జాబ్ క్యాలెండర్ ప్రకారం ఒక్క ఉద్యోగమైన భర్తీ చేశారా?’</h2>
-                    <p>‘జాబ్ క్యాలెండర్ ప్రకారం ఒక్క ఉద్యోగమైన భర్తీ చేశారా?’...</p>
-                    <div class="card-actions">
-                        <a href="https://news.google.com/rss/articles/CBMimAFBVV95cUxQel9LNjJ5SzNKbDBZbmFPTExsS2dfUHNOWTltcUFIZnluYVhlZXREbmhzZTFhOWZscnNmbnFpM0l0MXpCSnk4V1AyenVVVjltWmRjb2ota3dHWVdyWHFWMDdtVnN3X2RuZURlQUV1bDE1alpZci1hMW96VEtjekRoZUVac05McU9YR002REpmY1VUeHQzRDIwbw?oc=5" target="_blank" class="read-more-btn">చదవండి →</a>
-                        <button class="share-btn" onclick="shareNews('‘జాబ్ క్యాలెండర్ ప్రకారం ఒక్క ఉద్యోగమైన భర్తీ చేశారా?’', 'https://news.google.com/rss/articles/CBMimAFBVV95cUxQel9LNjJ5SzNKbDBZbmFPTExsS2dfUHNOWTltcUFIZnluYVhlZXREbmhzZTFhOWZscnNmbnFpM0l0MXpCSnk4V1AyenVVVjltWmRjb2ota3dHWVdyWHFWMDdtVnN3X2RuZURlQUV1bDE1alpZci1hMW96VEtjekRoZUVac05McU9YR002REpmY1VUeHQzRDIwbw?oc=5')">📲 షేర్</button>
-                    </div>
-                </div>
-            </div>
-<div class="news-card">
-                <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT Local">
-                <div class="news-body">
-                    <span class="news-meta">📍 కరీంనగర్ | 17-05-2026</span>
-                    <h2>MPTC ZPTC Polls: కరీంనగర్ జిల్లా నుంచి ఎన్నికల కసరత్తు ప్రారంభం.. రంగంలోకి యంత్రాంగం..</h2>
-                    <p>MPTC ZPTC Polls: కరీంనగర్ జిల్లా నుంచి ఎన్నికల కసరత్తు ప్రారంభం.. రంగంలోకి యంత్రాంగం.....</p>
-                    <div class="card-actions">
-                        <a href="https://news.google.com/rss/articles/CBMi0AFBVV95cUxNWXJmbWxQUDRhZUlFbWJRWXo5RWxGbEQzRGtCZVBZcGRiQU03M3BmMXJLc0c4cDE0RllIT1lJYnVMcDdyazZPQXEydmI1Rk53a0VGcWtwUGduSHpIdEtiSWZ2MzI4UnVPYzZiSk9HblFFVXRKb3VNOTJVQ2VkMk1jZ2xWa1UwMHc4SGUzTUltQ1dmdW9Eb00xX09ERlgySHhhSE51eE5tSkoyZWhid2paeDJTWnA4amdBMWh5cUxGSERPbTl4eldOU3RGeWwxSjZ20gHWAUFVX3lxTE1iXzlteFFaaDJnTTVRczJHZXViczlhS1dMc3NvRnoxRFdzWHBzc21yS0l6Mkx1QktRekZNQkxZRTJfU0tBNmd4Qm04UndSS3dWYjFlbHVTbnJOY0hVRnRLMVFMOGVGRjB5S0xVQmY5YmdjRXJaUURKd2JIZ0xMU256eTFTaVhOSE9jSlk1cTJDNjZ4dG1jcHgzcnlsRlR1RlhtTjJwRDlIZzJjVXVnQnZ6a2IzbEFBMl9GQ1ZJWU9kV3JWUGtMRHY0MVNNQldvbnZaRzJYTFE?oc=5" target="_blank" class="read-more-btn">చదవండి →</a>
-                        <button class="share-btn" onclick="shareNews('MPTC ZPTC Polls: కరీంనగర్ జిల్లా నుంచి ఎన్నికల కసరత్తు ప్రారంభం.. రంగంలోకి యంత్రాంగం..', 'https://news.google.com/rss/articles/CBMi0AFBVV95cUxNWXJmbWxQUDRhZUlFbWJRWXo5RWxGbEQzRGtCZVBZcGRiQU03M3BmMXJLc0c4cDE0RllIT1lJYnVMcDdyazZPQXEydmI1Rk53a0VGcWtwUGduSHpIdEtiSWZ2MzI4UnVPYzZiSk9HblFFVXRKb3VNOTJVQ2VkMk1jZ2xWa1UwMHc4SGUzTUltQ1dmdW9Eb00xX09ERlgySHhhSE51eE5tSkoyZWhid2paeDJTWnA4amdBMWh5cUxGSERPbTl4eldOU3RGeWwxSjZ20gHWAUFVX3lxTE1iXzlteFFaaDJnTTVRczJHZXViczlhS1dMc3NvRnoxRFdzWHBzc21yS0l6Mkx1QktRekZNQkxZRTJfU0tBNmd4Qm04UndSS3dWYjFlbHVTbnJOY0hVRnRLMVFMOGVGRjB5S0xVQmY5YmdjRXJaUURKd2JIZ0xMU256eTFTaVhOSE9jSlk1cTJDNjZ4dG1jcHgzcnlsRlR1RlhtTjJwRDlIZzJjVXVnQnZ6a2IzbEFBMl9GQ1ZJWU9kV3JWUGtMRHY0MVNNQldvbnZaRzJYTFE?oc=5')">📲 షేర్</button>
-                    </div>
-                </div>
-            </div>
-<div class="news-card">
-                <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT Local">
-                <div class="news-body">
-                    <span class="news-meta">📍 తెలంగాణ | 17-05-2026</span>
-                    <h2>స్వపరిపాలన స్ఫూర్తి కొరవడిన స్థానిక సంస్థలు</h2>
-                    <p>స్వపరిపాలన స్ఫూర్తి కొరవడిన స్థానిక సంస్థలు...</p>
-                    <div class="card-actions">
-                        <a href="https://news.google.com/rss/articles/CBMi_wFBVV95cUxNanJjMGc3THM5UzN2TUpORXJMRzNXdkVsbWp4Y2gwVmgwQWR5OFg0c2p6UnhvcUJGVGM5VE11dmQ4eWxLSnlfY2pMcmczVU51Vzd4WDhFc29jVEgxT1dkU3hObVFTcXpxY25RMGhoeksyWVozUXRZemNOVUdRSUx3eGpYN0hsOEVoT1dYZzJRXzNkck5ld3RMczEtbTFHdnZCM3VjNXdnSklwVnF4TjhpbUU0bG02M0x0Q0VwWGtWN09wbWNNZ0o5VmxvbEhPTnlZaURGSXlmZE1ObXlubGYwa19lR05tNWlDZVhoYlNMYTFtMTZ4MUppa3RGY3dDRUE?oc=5" target="_blank" class="read-more-btn">చదవండి →</a>
-                        <button class="share-btn" onclick="shareNews('స్వపరిపాలన స్ఫూర్తి కొరవడిన స్థానిక సంస్థలు', 'https://news.google.com/rss/articles/CBMi_wFBVV95cUxNanJjMGc3THM5UzN2TUpORXJMRzNXdkVsbWp4Y2gwVmgwQWR5OFg0c2p6UnhvcUJGVGM5VE11dmQ4eWxLSnlfY2pMcmczVU51Vzd4WDhFc29jVEgxT1dkU3hObVFTcXpxY25RMGhoeksyWVozUXRZemNOVUdRSUx3eGpYN0hsOEVoT1dYZzJRXzNkck5ld3RMczEtbTFHdnZCM3VjNXdnSklwVnF4TjhpbUU0bG02M0x0Q0VwWGtWN09wbWNNZ0o5VmxvbEhPTnlZaURGSXlmZE1ObXlubGYwa19lR05tNWlDZVhoYlNMYTFtMTZ4MUppa3RGY3dDRUE?oc=5')">📲 షేర్</button>
-                    </div>
-                </div>
-            </div>
-<div class="news-card">
-                <img src="https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600" alt="NINT Local">
-                <div class="news-body">
-                    <span class="news-meta">📍 తెలంగాణ | 17-05-2026</span>
-                    <h2>TG News: 50 కి.మీ.కు ఒక లోకల్‌ మార్కెట్‌</h2>
-                    <p>TG News: 50 కి.మీ.కు ఒక లోకల్‌ మార్కెట్‌...</p>
-                    <div class="card-actions">
-                        <a href="https://news.google.com/rss/articles/CBMikgFBVV95cUxOdlVsNmFhOTZ5V25KQ3pMd1lmVVJLNnhXQ2dJM01YYzVIbmVkcXhDek9IUTBINVZ5VkhjNWxPaTJJZUFCQmpHeFBLR0tlZm5nVFF5WXo3ajBVRUtvUnNiLXAzY2RKSC1vc05rX0I0UWg3Nmc3MVFlUHBYUHBVOHNOanhUWDh4T2NtUE5EazN1bFIyd9IBkgFBVV95cUxOdlVsNmFhOTZ5V25KQ3pMd1lmVVJLNnhXQ2dJM01YYzVIbmVkcXhDek9IUTBINVZ5VkhjNWxPaTJJZUFCQmpHeFBLR0tlZm5nVFF5WXo3ajBVRUtvUnNiLXAzY2RKSC1vc05rX0I0UWg3Nmc3MVFlUHBYUHBVOHNOanhUWDh4T2NtUE5EazN1bFIydw?oc=5" target="_blank" class="read-more-btn">చదవండి →</a>
-                        <button class="share-btn" onclick="shareNews('TG News: 50 కి.మీ.కు ఒక లోకల్‌ మార్కెట్‌', 'https://news.google.com/rss/articles/CBMikgFBVV95cUxOdlVsNmFhOTZ5V25KQ3pMd1lmVVJLNnhXQ2dJM01YYzVIbmVkcXhDek9IUTBINVZ5VkhjNWxPaTJJZUFCQmpHeFBLR0tlZm5nVFF5WXo3ajBVRUtvUnNiLXAzY2RKSC1vc05rX0I0UWg3Nmc3MVFlUHBYUHBVOHNOanhUWDh4T2NtUE5EazN1bFIyd9IBkgFBVV95cUxOdlVsNmFhOTZ5V25KQ3pMd1lmVVJLNnhXQ2dJM01YYzVIbmVkcXhDek9IUTBINVZ5VkhjNWxPaTJJZUFCQmpHeFBLR0tlZm5nVFF5WXo3ajBVRUtvUnNiLXAzY2RKSC1vc05rX0I0UWg3Nmc3MVFlUHBYUHBVOHNOanhUWDh4T2NtUE5EazN1bFIydw?oc=5')">📲 షేర్</button>
-                    </div>
-                </div>
-            </div>
-<div class="news-card">
-                <img src="https://images.unsplash.com/photo-1610473187211-137b0d7715ec?w=600" alt="NINT Local">
-                <div class="news-body">
-                    <span class="news-meta">📍 తెలంగాణ | 17-05-2026</span>
-                    <h2>పోక్సో కేసులో కీలక పరిణామం.. పోలీసుల ఎదుట లొంగిపోయిన బండి భగీరథ్</h2>
-                    <p>పోక్సో కేసులో కీలక పరిణామం.. పోలీసుల ఎదుట లొంగిపోయిన బండి భగీరథ్...</p>
-                    <div class="card-actions">
-                        <a href="https://news.google.com/rss/articles/CBMixwFBVV95cUxQcnlELW42SzdfbWYtNk1uS3VWSG9WdzF6OV9qajNLTnVfdkdGN3RvanctTGEzTjdDbUJPcVlvd3VQcnJ2SEhhSm5YTmNCZUE1enV5VUFtb0lEd3FMYVE3ems3V09rcE5lUnhMNkhiMlZUa1JOdTFTU01JUXROZ1k5bHgtU242Wlp2U1h4cEpoMTJYaFlRZ243ZU1vbzc3ZzZPbXdpWjNIcDh4R2Y3eDQxX3lrX1FaalZ3UmFnc25sOG1CZ2I0RVlj0gHMAUFVX3lxTE5fOFZjN1BZa2hqLW45QUpWU3VKTjg0OHdQWndCdlZCOHFkSjhoR3l4NjRTQTFNdUM3blZMOW1pcm5tTWh6b1VyeVR5M3dNUlhkMUd0VDE2bC1USEs3NktRSWUzU3lwU3luTEpId2lRdDNBZTJOWGx4RDVEbGVMam1IUEx6VGZZakhwOGJNLWY0UHlTZmVQemR2ZmtTNjR1NU11WEM5WnVlMHJabkZCTjZGVDFHbVVZSFQ5UVloeTdyUlE2bWt6Z2xNbGVhOQ?oc=5" target="_blank" class="read-more-btn">చదవండి →</a>
-                        <button class="share-btn" onclick="shareNews('పోక్సో కేసులో కీలక పరిణామం.. పోలీసుల ఎదుట లొంగిపోయిన బండి భగీరథ్', 'https://news.google.com/rss/articles/CBMixwFBVV95cUxQcnlELW42SzdfbWYtNk1uS3VWSG9WdzF6OV9qajNLTnVfdkdGN3RvanctTGEzTjdDbUJPcVlvd3VQcnJ2SEhhSm5YTmNCZUE1enV5VUFtb0lEd3FMYVE3ems3V09rcE5lUnhMNkhiMlZUa1JOdTFTU01JUXROZ1k5bHgtU242Wlp2U1h4cEpoMTJYaFlRZ243ZU1vbzc3ZzZPbXdpWjNIcDh4R2Y3eDQxX3lrX1FaalZ3UmFnc25sOG1CZ2I0RVlj0gHMAUFVX3lxTE5fOFZjN1BZa2hqLW45QUpWU3VKTjg0OHdQWndCdlZCOHFkSjhoR3l4NjRTQTFNdUM3blZMOW1pcm5tTWh6b1VyeVR5M3dNUlhkMUd0VDE2bC1USEs3NktRSWUzU3lwU3luTEpId2lRdDNBZTJOWGx4RDVEbGVMam1IUEx6VGZZakhwOGJNLWY0UHlTZmVQemR2ZmtTNjR1NU11WEM5WnVlMHJabkZCTjZGVDFHbVVZSFQ5UVloeTdyUlE2bWt6Z2xNbGVhOQ?oc=5')">📲 షేర్</button>
-                    </div>
-                </div>
-            </div>
-<div class="news-card">
-                <img src="https://images.unsplash.com/photo-1610473187211-137b0d7715ec?w=600" alt="NINT Local">
-                <div class="news-body">
-                    <span class="news-meta">📍 తెలంగాణ | 17-05-2026</span>
-                    <h2>భగీరథ్‌ను పోలీసులకు అప్పగించాం: బండి సంజయ్‌</h2>
-                    <p>భగీరథ్‌ను పోలీసులకు అప్పగించాం: బండి సంజయ్‌...</p>
-                    <div class="card-actions">
-                        <a href="https://news.google.com/rss/articles/CBMiqgFBVV95cUxPMU9qQnh1QVNuRkRVQlVaWUYyR1NlYnNFU0c1S3pTWFl2enZyRS1YNWM4TTNwVjVuanlWMGxPcDdZVDZ4RnFyOXZfQ0w4ZzMyRHZEV1J1cXliQnAtNS1CWXY4RkNTTDZfTVA4YXVtellBTDFlVkh6alRWSU9XU2RGcjRnakpabnBsdzFYdi01RW1KQWIyVVVmV0ZraUF1SjB3aFRvZ0R6VzFyZ9IBqgFBVV95cUxPMU9qQnh1QVNuRkRVQlVaWUYyR1NlYnNFU0c1S3pTWFl2enZyRS1YNWM4TTNwVjVuanlWMGxPcDdZVDZ4RnFyOXZfQ0w4ZzMyRHZEV1J1cXliQnAtNS1CWXY4RkNTTDZfTVA4YXVtellBTDFlVkh6alRWSU9XU2RGcjRnakpabnBsdzFYdi01RW1KQWIyVVVmV0ZraUF1SjB3aFRvZ0R6VzFyZw?oc=5" target="_blank" class="read-more-btn">చదవండి →</a>
-                        <button class="share-btn" onclick="shareNews('భగీరథ్‌ను పోలీసులకు అప్పగించాం: బండి సంజయ్‌', 'https://news.google.com/rss/articles/CBMiqgFBVV95cUxPMU9qQnh1QVNuRkRVQlVaWUYyR1NlYnNFU0c1S3pTWFl2enZyRS1YNWM4TTNwVjVuanlWMGxPcDdZVDZ4RnFyOXZfQ0w4ZzMyRHZEV1J1cXliQnAtNS1CWXY4RkNTTDZfTVA4YXVtellBTDFlVkh6alRWSU9XU2RGcjRnakpabnBsdzFYdi01RW1KQWIyVVVmV0ZraUF1SjB3aFRvZ0R6VzFyZ9IBqgFBVV95cUxPMU9qQnh1QVNuRkRVQlVaWUYyR1NlYnNFU0c1S3pTWFl2enZyRS1YNWM4TTNwVjVuanlWMGxPcDdZVDZ4RnFyOXZfQ0w4ZzMyRHZEV1J1cXliQnAtNS1CWXY4RkNTTDZfTVA4YXVtellBTDFlVkh6alRWSU9XU2RGcjRnakpabnBsdzFYdi01RW1KQWIyVVVmV0ZraUF1SjB3aFRvZ0R6VzFyZw?oc=5')">📲 షేర్</button>
-                    </div>
-                </div>
-            </div>
-<div class="news-card">
-                <img src="https://images.unsplash.com/photo-1610473187211-137b0d7715ec?w=600" alt="NINT Local">
-                <div class="news-body">
-                    <span class="news-meta">📍 తెలంగాణ | 17-05-2026</span>
-                    <h2>Telangana Police : బక్రీద్‌కు తెలంగాణ పోలీసుల భారీ భద్రతా చర్యలు</h2>
-                    <p>Telangana Police : బక్రీద్‌కు తెలంగాణ పోలీసుల భారీ భద్రతా చర్యలు...</p>
-                    <div class="card-actions">
-                        <a href="https://news.google.com/rss/articles/CBMiiwFBVV95cUxOZ01hSEIxZVRFZy1WWTl1ZWxNZmticjNYRTJaQmxCbWg1dEdHUzVmS1FMbHhEN2wyUXRFbGRCUGgwaFRFakh4LVVrMkpCc0lhdlVNZ2hBUDlrTWdYaFBjVXN0V1FqYWpwM196WWxKRHFobGRpNldRUVk3WE02ZUsxRkphcHFyVHhDUmRr0gGQAUFVX3lxTE1hR24yQ1JUV1RjS2ZxZmpZXzBFZ3dfU2dJRmtPd3hKZ2RrbDQ0QlFxNS1YNkJvc0ZJS1ZHdGhLRWJsMnY1ZWxYU1Qyakhqc0lBSWc1R2RZb0lXOVNBV3hpajZQLVVfYzQ5b2FaV2YyaktyVy1lY082Rk16RTk1MzN4RHhqWkdfMkRYRHF5UjV5Qw?oc=5" target="_blank" class="read-more-btn">చదవండి →</a>
-                        <button class="share-btn" onclick="shareNews('Telangana Police : బక్రీద్‌కు తెలంగాణ పోలీసుల భారీ భద్రతా చర్యలు', 'https://news.google.com/rss/articles/CBMiiwFBVV95cUxOZ01hSEIxZVRFZy1WWTl1ZWxNZmticjNYRTJaQmxCbWg1dEdHUzVmS1FMbHhEN2wyUXRFbGRCUGgwaFRFakh4LVVrMkpCc0lhdlVNZ2hBUDlrTWdYaFBjVXN0V1FqYWpwM196WWxKRHFobGRpNldRUVk3WE02ZUsxRkphcHFyVHhDUmRr0gGQAUFVX3lxTE1hR24yQ1JUV1RjS2ZxZmpZXzBFZ3dfU2dJRmtPd3hKZ2RrbDQ0QlFxNS1YNkJvc0ZJS1ZHdGhLRWJsMnY1ZWxYU1Qyakhqc0lBSWc1R2RZb0lXOVNBV3hpajZQLVVfYzQ5b2FaV2YyaktyVy1lY082Rk16RTk1MzN4RHhqWkdfMkRYRHF5UjV5Qw?oc=5')">📲 షేర్</button>
-                    </div>
-                </div>
-            </div>
-<div class="news-card">
-                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" alt="NINT Local">
-                <div class="news-body">
-                    <span class="news-meta">📍 తెలంగాణ | 17-05-2026</span>
-                    <h2>Gold Rate Today: ట్రంప్ ప్రకటన.. భారీగా తగ్గిన బంగారం ధరలు.. నేడు మే 12వ తేదీ తులం ధర ఎంతంటే?</h2>
-                    <p>Gold Rate Today: ట్రంప్ ప్రకటన.. భారీగా తగ్గిన బంగారం ధరలు.. నేడు మే 12వ తేదీ తులం ధర ఎంతంటే?...</p>
-                    <div class="card-actions">
-                        <a href="https://news.google.com/rss/articles/CBMi4wFBVV95cUxQVHZreXgwbWZyUTdOWnlvdU0zbWU2b2xsQzAwSWpvWTRVR21PTGpOS01taTlGaFpnMTBxTjZLdFNyTFBUX25MU2g5eGpuMmVkUUVJb3ZhaHNibEdoYmNSRl9sTkhabkt3U0R5RXNOdVMwSGU0OXBZRUp2VVhtaTdCOVM1Z1Q5X1M1U3Q5cWg4N0hWUUpqSGFRajFCdEtjTDlFSlJwTl9OMTZZWWRoQVUwTm1GazduV050aHk2SWJGc2ZmM0tISWtfVUExWktWNVhZVUoyWlA1ZzZjYmxaN2VtZ2Qxdw?oc=5" target="_blank" class="read-more-btn">చదవండి →</a>
-                        <button class="share-btn" onclick="shareNews('Gold Rate Today: ట్రంప్ ప్రకటన.. భారీగా తగ్గిన బంగారం ధరలు.. నేడు మే 12వ తేదీ తులం ధర ఎంతంటే?', 'https://news.google.com/rss/articles/CBMi4wFBVV95cUxQVHZreXgwbWZyUTdOWnlvdU0zbWU2b2xsQzAwSWpvWTRVR21PTGpOS01taTlGaFpnMTBxTjZLdFNyTFBUX25MU2g5eGpuMmVkUUVJb3ZhaHNibEdoYmNSRl9sTkhabkt3U0R5RXNOdVMwSGU0OXBZRUp2VVhtaTdCOVM1Z1Q5X1M1U3Q5cWg4N0hWUUpqSGFRajFCdEtjTDlFSlJwTl9OMTZZWWRoQVUwTm1GazduV050aHk2SWJGc2ZmM0tISWtfVUExWktWNVhZVUoyWlA1ZzZjYmxaN2VtZ2Qxdw?oc=5')">📲 షేర్</button>
-                    </div>
-                </div>
-            </div>
-<div class="news-card">
-                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" alt="NINT Local">
-                <div class="news-body">
-                    <span class="news-meta">📍 తెలంగాణ | 17-05-2026</span>
-                    <h2>Gold Price Today: అక్షయ తృతీయ సేల్స్ డౌన్... బంగారం ధర ఢమాల్... రూ.24 వేలు తక్కువకే గోల్డ్</h2>
-                    <p>Gold Price Today: అక్షయ తృతీయ సేల్స్ డౌన్... బంగారం ధర ఢమాల్... రూ.24 వేలు తక్కువకే గోల్డ్...</p>
-                    <div class="card-actions">
-                        <a href="https://news.google.com/rss/articles/CBMi1wFBVV95cUxQUEhzdG1zYlJwU2oyZnBFV05MX1FST3cyZ2h0NEtfd25vbGpEOVFtU3liNTZ5MXk1WXVaQnRUOGw0dGc4MHdaUmpWSUUwVnk2akktS2VZV3Rna2psX0RQcWF0aGt4a3VNdmVqalNXVmY1T1pPUUNCbzN6SkpyaTNtNFV2TnQ0eHFfTG5FejcxTHpxXzItRENPWjRWM3Zfa1c5UjA4X1JIRWpGdUtqRXRpa0xtTGExbjN1enlIS1BwUm80dUJkb2pSZUE1UFdJdTJYeW5QSWQ1Y9IB3AFBVV95cUxNYjY0LTVZc2xlSFZuREVxZjdpNDQ1bWlZLUxJcEwtZUFjTVFYdFNkTDBoUWZfcVNOeEdlRFVWZFVjeU5Sam9EQ0JWSHBwQ1E3Y0Q0Sm9rbXZvemhfb2xNQ0FJSkkyUUpFOWZIRm0xZDBXbDl1aGttX3JzRWVuNjFveEFiQWtEU3hSMWVVV3FXeTlwcEdEaDV0OE5jMVNVSXVubVgyZk9LUEVTd0cwYWc2eTd1WjJJTEZJZktvUXl1SW1oUm1DeUxsanBSTWNVd01CcmpRay1mLURvWEtW?oc=5" target="_blank" class="read-more-btn">చదవండి →</a>
-                        <button class="share-btn" onclick="shareNews('Gold Price Today: అక్షయ తృతీయ సేల్స్ డౌన్... బంగారం ధర ఢమాల్... రూ.24 వేలు తక్కువకే గోల్డ్', 'https://news.google.com/rss/articles/CBMi1wFBVV95cUxQUEhzdG1zYlJwU2oyZnBFV05MX1FST3cyZ2h0NEtfd25vbGpEOVFtU3liNTZ5MXk1WXVaQnRUOGw0dGc4MHdaUmpWSUUwVnk2akktS2VZV3Rna2psX0RQcWF0aGt4a3VNdmVqalNXVmY1T1pPUUNCbzN6SkpyaTNtNFV2TnQ0eHFfTG5FejcxTHpxXzItRENPWjRWM3Zfa1c5UjA4X1JIRWpGdUtqRXRpa0xtTGExbjN1enlIS1BwUm80dUJkb2pSZUE1UFdJdTJYeW5QSWQ1Y9IB3AFBVV95cUxNYjY0LTVZc2xlSFZuREVxZjdpNDQ1bWlZLUxJcEwtZUFjTVFYdFNkTDBoUWZfcVNOeEdlRFVWZFVjeU5Sam9EQ0JWSHBwQ1E3Y0Q0Sm9rbXZvemhfb2xNQ0FJSkkyUUpFOWZIRm0xZDBXbDl1aGttX3JzRWVuNjFveEFiQWtEU3hSMWVVV3FXeTlwcEdEaDV0OE5jMVNVSXVubVgyZk9LUEVTd0cwYWc2eTd1WjJJTEZJZktvUXl1SW1oUm1DeUxsanBSTWNVd01CcmpRay1mLURvWEtW?oc=5')">📲 షేర్</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-</div>
+// ── Utilities ─────────────────────────────────────────────────────────────────
+const uid = () => Math.random().toString(36).slice(2, 9);
+const ts = () => new Date().toISOString().replace("T", " ").slice(0, 23);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
-<footer>
-    <div class="footer-container">
-        <div class="footer-about">
-            <h3>NINT NEWS గుండెచప్పుడు</h3>
-            <p>తెలంగాణ గుండెచప్పుడు.. నిమిష నిమిషానికి లైవ్ అప్‌డేట్స్! NINT NEWS అంటే సోది లేని వార్తలు, పక్కా లోకల్ నిజాలు. రాజకీయం, క్రైమ్, మార్కెట్, రైతు రాతలు—ఎక్కడ ఏది జరిగినా అందరికంటే ముందే మీ స్క్రీన్ పైకి వస్తుంది. పక్షపాతం లేదు, ప్రచారం లేదు.. కేవలం ప్యూర్ బ్రేకింగ్ ఇన్ఫర్మేషన్!</p>
-        </div>
-        <div class="footer-links">
-            <h3>లీగల్ సిస్టమ్</h3>
-            <a href="#" onclick="openModal('privacy'); return false;">🔒 Privacy Policy</a><br>
-            <a href="#" onclick="openModal('terms'); return false;">⚖️ Terms & Conditions</a>
-        </div>
-    </div>
-    <p class="copyright">&copy; 2026 NINT NEWS NETWORK • Chief Editor: Kavya • టోటల్ ఫీడ్స్: 11</p>
-</footer>
+// ── Workflow Definitions ──────────────────────────────────────────────────────
+const WORKFLOW_DEFS = [
+  {
+    id: "schema-sync",
+    name: "Schema Sync",
+    icon: "⬡",
+    color: COLORS.accent,
+    sections: ["fetch-schema", "diff-analysis", "migration-gen", "apply-patch"],
+    intervalMs: 12000,
+    priority: "CRITICAL",
+  },
+  {
+    id: "data-pipeline",
+    name: "Data Pipeline",
+    icon: "⟿",
+    color: COLORS.info,
+    sections: ["ingest", "transform", "validate", "load"],
+    intervalMs: 8000,
+    priority: "HIGH",
+  },
+  {
+    id: "health-probe",
+    name: "Health Monitor",
+    icon: "◈",
+    color: COLORS.success,
+    sections: ["ping-services", "check-latency", "eval-thresholds", "report"],
+    intervalMs: 5000,
+    priority: "MEDIUM",
+  },
+  {
+    id: "config-drift",
+    name: "Config Drift Detector",
+    icon: "⟁",
+    color: COLORS.warn,
+    sections: ["snapshot", "compare", "reconcile", "notify"],
+    intervalMs: 15000,
+    priority: "HIGH",
+  },
+  {
+    id: "cache-warm",
+    name: "Cache Warmer",
+    icon: "⬡",
+    color: COLORS.info,
+    sections: ["collect-keys", "priority-sort", "prefetch", "verify"],
+    intervalMs: 20000,
+    priority: "LOW",
+  },
+];
 
-<div id="privacyModal" class="custom-modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeModal('privacy')">&times;</span>
-        <h2>Privacy Policy</h2>
-        <p>NINT NEWS కు స్వాగతం. మా వెబ్‌సైట్ యూజర్ల వ్యక్తిగత సమాచారాన్ని లేదా బ్రౌజింగ్ హిస్టరీని సేకరించదు. మేము కేవలం పబ్లిక్ RSS ఫీడ్స్ ఆధారంగా ఆటోమేటెడ్ పద్ధతిలో వార్తలను బ్రీఫ్ చేసి అందిస్తాము. మా సైట్ లో ప్రదర్శించబడే థర్డ్-పార్టీ యాడ్స్ (Google AdSense) వారి సొంత పాలసీల ప్రకారం కుకీస్ ని ఉపయోగించవచ్చు.</p>
-    </div>
-</div>
+const SECTION_LABELS = {
+  "fetch-schema": "Fetch Remote Schema",
+  "diff-analysis": "Diff Analysis",
+  "migration-gen": "Generate Migration",
+  "apply-patch": "Apply Patch",
+  ingest: "Ingest Source Data",
+  transform: "Transform Records",
+  validate: "Validate Output",
+  load: "Load to Target",
+  "ping-services": "Ping Services",
+  "check-latency": "Check Latency",
+  "eval-thresholds": "Eval Thresholds",
+  report: "Emit Report",
+  snapshot: "Capture Snapshot",
+  compare: "Compare State",
+  reconcile: "Reconcile Drift",
+  notify: "Send Notifications",
+  "collect-keys": "Collect Cache Keys",
+  "priority-sort": "Priority Sort",
+  prefetch: "Prefetch Data",
+  verify: "Verify Cache",
+};
 
-<div id="termsModal" class="custom-modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeModal('terms')">&times;</span>
-        <h2>Terms & Conditions</h2>
-        <p>NINT NEWS లోని సమాచారం అంతా ఆర్టిఫిషియల్ ఇంటెలిజెన్స్ (AI) మరియు RSS ఇంజిన్ల ద్వారా ఆటోమేటెడ్ పద్ధతిలో వివిధ ప్రచురణల నుండి సేకరించబడుతుంది. ఈ వార్తల యొక్క ప్రాథమిక ఖచ్చితత్వానికి ఒరిజినల్ పబ్లిషర్స్ మాత్రమే బాధ్యులు. యూజర్లు కేవలం సమాచార అవగాహన కొరకు మాత్రమే ఈ సైట్ ని ఉపయోగించవలెను.</p>
-    </div>
-</div>
+const LOG_TEMPLATES = {
+  "fetch-schema": [
+    "Connecting to remote schema registry...",
+    "Fetching schema v{v} from endpoint",
+    "Received {n} type definitions",
+    "Schema checksum: {h}",
+  ],
+  "diff-analysis": [
+    "Running 3-way diff against baseline",
+    "Detected {n} field additions, {m} removals",
+    "Conflict resolution: MERGE_LATEST strategy",
+    "Diff complete — delta score {d}",
+  ],
+  "migration-gen": [
+    "Generating migration script...",
+    "Script contains {n} statements",
+    "Estimated execution: {t}ms",
+    "Migration staged for review",
+  ],
+  "apply-patch": [
+    "Acquiring schema write lock",
+    "Applying {n} patch operations",
+    "Committing transaction",
+    "Lock released — patch applied ✓",
+  ],
+  ingest: [
+    "Opening data stream from source",
+    "Received batch #{b} — {n} records",
+    "Throughput: {r} rec/s",
+    "Batch checksum verified",
+  ],
+  transform: [
+    "Applying {n} transform rules",
+    "Field mapping: {f} columns remapped",
+    "Null coercion applied to {n} fields",
+    "Transform pipeline complete",
+  ],
+  validate: [
+    "Running schema validation",
+    "{n} records passed, {m} flagged",
+    "Applying correction heuristics",
+    "Validation score: {s}%",
+  ],
+  load: [
+    "Opening write channel to target",
+    "Flushing {n} records",
+    "Write committed — {t}ms elapsed",
+    "Target acknowledged receipt",
+  ],
+  "ping-services": [
+    "Pinging {n} registered endpoints",
+    "All primary nodes responding",
+    "2 edge nodes degraded — logged",
+    "Ping sweep complete",
+  ],
+  "check-latency": [
+    "Sampling p50/p95/p99 latency",
+    "p50={a}ms  p95={b}ms  p99={c}ms",
+    "Baseline delta: {d}%",
+    "Latency within acceptable bounds",
+  ],
+  "eval-thresholds": [
+    "Evaluating {n} alert thresholds",
+    "CPU threshold: {c}% (limit {l}%)",
+    "Memory pressure: nominal",
+    "No threshold breaches detected",
+  ],
+  report: [
+    "Compiling health snapshot",
+    "Overall health score: {s}/100",
+    "Emitting metrics to aggregator",
+    "Report dispatched",
+  ],
+  snapshot: [
+    "Capturing config snapshot #{n}",
+    "Serializing {n} config keys",
+    "Snapshot stored at {h}",
+    "Snapshot fingerprint: {f}",
+  ],
+  compare: [
+    "Comparing against last snapshot",
+    "Found {n} drift keys",
+    "Drift severity: {s}",
+    "Comparison complete",
+  ],
+  reconcile: [
+    "Reconciling {n} drifted values",
+    "Applying authoritative config",
+    "{n} keys corrected, {m} skipped",
+    "Reconciliation committed",
+  ],
+  notify: [
+    "Preparing notification payload",
+    "Routing to {n} subscribers",
+    "Delivery confirmed: {n}/{m}",
+    "Notification cycle closed",
+  ],
+  "collect-keys": [
+    "Scanning cache namespace",
+    "Identified {n} cold keys",
+    "Priority queue built — {n} entries",
+    "Key collection complete",
+  ],
+  "priority-sort": [
+    "Sorting by access frequency",
+    "Top {n} keys flagged for prefetch",
+    "LRU eviction candidates: {m}",
+    "Sort complete",
+  ],
+  prefetch: [
+    "Issuing prefetch for {n} keys",
+    "Batch {b}/{t} loaded",
+    "Cache fill rate: {r}%",
+    "Prefetch complete",
+  ],
+  verify: [
+    "Verifying cache consistency",
+    "{n} keys confirmed warm",
+    "Hit-rate improvement: +{d}%",
+    "Cache verification passed ✓",
+  ],
+};
 
-<script>
-function shareNews(title, link) {
-    const shareData = {
-        title: title,
-        text: title + " \n\n👉 పూర్తి వివరాల కోసం NINT News చూడండి: \n",
-        url: link
-    };
-    if (navigator.share) {
-        navigator.share(shareData).catch((error) => console.log('Error sharing:', error));
+function renderLog(section) {
+  const templates = LOG_TEMPLATES[section] || ["Processing..."];
+  const r = (n, m = 100) => Math.floor(Math.random() * m + n);
+  return templates[Math.floor(Math.random() * templates.length)]
+    .replace("{v}", `${r(1, 9)}.${r(0, 99)}.${r(0, 999)}`)
+    .replace("{n}", r(2, 50))
+    .replace("{m}", r(1, 20))
+    .replace("{h}", Math.random().toString(16).slice(2, 10))
+    .replace("{f}", Math.random().toString(16).slice(2, 10))
+    .replace("{t}", r(10, 500))
+    .replace("{d}", r(1, 30))
+    .replace("{b}", r(1, 20))
+    .replace("{r}", r(100, 9999))
+    .replace("{s}", r(75, 100))
+    .replace("{l}", r(70, 95))
+    .replace("{c}", r(10, 80))
+    .replace("{a}", r(5, 50))
+    .replace("{b}", r(50, 150))
+    .replace("{c}", r(150, 400));
+}
+
+// ── State Machine ─────────────────────────────────────────────────────────────
+function createWorkflowState() {
+  return WORKFLOW_DEFS.map((def) => ({
+    ...def,
+    status: "idle",
+    cycleCount: 0,
+    lastRun: null,
+    nextRun: Date.now() + def.intervalMs,
+    currentSection: null,
+    sectionProgress: {},
+    logs: [],
+    cycles: [],
+    health: 100,
+    errorCount: 0,
+    avgDuration: 0,
+    totalDuration: 0,
+  }));
+}
+
+// ── Simulation Engine ─────────────────────────────────────────────────────────
+async function runWorkflowCycle(wfId, setState, signal) {
+  const def = WORKFLOW_DEFS.find((d) => d.id === wfId);
+  if (!def) return;
+
+  const cycleId = uid();
+  const cycleStart = Date.now();
+  const sectionResults = [];
+
+  setState((prev) =>
+    prev.map((w) =>
+      w.id !== wfId
+        ? w
+        : {
+            ...w,
+            status: "running",
+            currentSection: null,
+            sectionProgress: {},
+            logs: [
+              ...w.logs.slice(-200),
+              { id: uid(), time: ts(), level: "INFO", msg: `── Cycle #${w.cycleCount + 1} started ──`, section: null },
+            ],
+          }
+    )
+  );
+
+  for (const section of def.sections) {
+    if (signal.aborted) return;
+
+    const sectionStart = Date.now();
+    const shouldFail = Math.random() < 0.06; // 6% failure rate per section
+
+    setState((prev) =>
+      prev.map((w) =>
+        w.id !== wfId
+          ? w
+          : {
+              ...w,
+              currentSection: section,
+              sectionProgress: { ...w.sectionProgress, [section]: "running" },
+              logs: [
+                ...w.logs.slice(-200),
+                { id: uid(), time: ts(), level: "INFO", msg: `→ ${SECTION_LABELS[section]}`, section },
+              ],
+            }
+      )
+    );
+
+    // Emit 2-4 log lines per section with timing
+    const logCount = 2 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < logCount; i++) {
+      if (signal.aborted) return;
+      await sleep(200 + Math.random() * 400);
+      const msg = renderLog(section);
+      const level = shouldFail && i === logCount - 1 ? "ERROR" : "INFO";
+      setState((prev) =>
+        prev.map((w) =>
+          w.id !== wfId
+            ? w
+            : { ...w, logs: [...w.logs.slice(-200), { id: uid(), time: ts(), level, msg, section }] }
+        )
+      );
+    }
+
+    const sectionDuration = Date.now() - sectionStart;
+
+    if (shouldFail) {
+      sectionResults.push({ section, status: "failed", duration: sectionDuration });
+      setState((prev) =>
+        prev.map((w) =>
+          w.id !== wfId
+            ? w
+            : {
+                ...w,
+                status: "error",
+                currentSection: null,
+                errorCount: w.errorCount + 1,
+                health: clamp(w.health - 15, 0, 100),
+                sectionProgress: { ...w.sectionProgress, [section]: "failed" },
+                logs: [
+                  ...w.logs.slice(-200),
+                  { id: uid(), time: ts(), level: "ERROR", msg: `✗ Section failed: ${SECTION_LABELS[section]}`, section },
+                ],
+              }
+        )
+      );
+      break;
     } else {
-        const whatsappUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(title + "\n" + link);
-        window.open(whatsappUrl, '_blank');
+      sectionResults.push({ section, status: "done", duration: sectionDuration });
+      setState((prev) =>
+        prev.map((w) =>
+          w.id !== wfId
+            ? w
+            : {
+                ...w,
+                sectionProgress: { ...w.sectionProgress, [section]: "done" },
+                health: clamp(w.health + 1, 0, 100),
+              }
+        )
+      );
     }
+
+    await sleep(100);
+  }
+
+  if (signal.aborted) return;
+
+  const cycleDuration = Date.now() - cycleStart;
+  const allPassed = sectionResults.every((r) => r.status === "done");
+  const cycleRecord = {
+    id: cycleId,
+    time: ts(),
+    duration: cycleDuration,
+    status: allPassed ? "success" : "failed",
+    sections: sectionResults,
+  };
+
+  setState((prev) =>
+    prev.map((w) => {
+      if (w.id !== wfId) return w;
+      const newTotal = w.totalDuration + cycleDuration;
+      const newCount = w.cycleCount + 1;
+      return {
+        ...w,
+        status: allPassed ? "idle" : "error",
+        currentSection: null,
+        cycleCount: newCount,
+        lastRun: ts(),
+        nextRun: Date.now() + def.intervalMs,
+        avgDuration: Math.round(newTotal / newCount),
+        totalDuration: newTotal,
+        cycles: [cycleRecord, ...w.cycles].slice(0, 50),
+        logs: [
+          ...w.logs.slice(-200),
+          {
+            id: uid(),
+            time: ts(),
+            level: allPassed ? "SUCCESS" : "ERROR",
+            msg: allPassed
+              ? `✓ Cycle #${newCount} complete — ${cycleDuration}ms`
+              : `✗ Cycle #${newCount} aborted after ${cycleDuration}ms`,
+            section: null,
+          },
+        ],
+      };
+    })
+  );
 }
 
-function openModal(type) {
-    document.getElementById(type + 'Modal').style.display = 'block';
-}
-function closeModal(type) {
-    document.getElementById(type + 'Modal').style.display = 'none';
-}
-window.onclick = function(event) {
-    if (event.target.className === 'custom-modal') {
-        event.target.style.display = 'none';
-    }
-}
-</script>
+// ── Components ────────────────────────────────────────────────────────────────
 
-</body>
-</html>
+const css = (strings, ...vals) => strings.reduce((acc, s, i) => acc + s + (vals[i] ?? ""), "");
+
+const globalStyle = css`
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0c10;
+    color: #e6edf3;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  @keyframes pulse-ring {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(2); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
+  @keyframes slide-in-left {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slide-in-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes bar-fill {
+    from { width: 0; }
+  }
+  @keyframes glow-pulse {
+    0%,100% { box-shadow: 0 0 8px #00d4aa33; }
+    50% { box-shadow: 0 0 20px #00d4aa66; }
+  }
+`;
+
+function StatusDot({ status, color }) {
+  const map = {
+    running: COLORS.accent,
+    idle: COLORS.muted,
+    error: COLORS.danger,
+    success: COLORS.success,
+  };
+  const c = color || map[status] || COLORS.muted;
+  return (
+    <span style={{ position: "relative", display: "inline-block", width: 10, height: 10 }}>
+      <span
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: "50%",
+          background: c,
+          opacity: status === "running" ? 1 : 0.7,
+        }}
+      />
+      {status === "running" && (
+        <span
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "50%",
+            background: c,
+            animation: "pulse-ring 1.2s ease-out infinite",
+          }}
+        />
+      )}
+    </span>
+  );
+}
+
+function HealthBar({ value, height = 4 }) {
+  const color =
+    value >= 80 ? COLORS.success : value >= 50 ? COLORS.warn : COLORS.danger;
+  return (
+    <div
+      style={{
+        height,
+        background: "#21262d",
+        borderRadius: 2,
+        overflow: "hidden",
+        flex: 1,
+      }}
+    >
+      <div
+        style={{
+          height: "100%",
+          width: `${value}%`,
+          background: color,
+          transition: "width 0.6s ease, background 0.4s",
+          animation: "bar-fill 0.8s ease",
+        }}
+      />
+    </div>
+  );
+}
+
+function SectionPill({ section, status, color }) {
+  const statusColor =
+    status === "done"
+      ? COLORS.success
+      : status === "running"
+      ? color || COLORS.accent
+      : status === "failed"
+      ? COLORS.danger
+      : COLORS.muted;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "4px 10px",
+        borderRadius: 4,
+        border: `1px solid ${statusColor}33`,
+        background: `${statusColor}11`,
+        animation: status === "running" ? "glow-pulse 1.5s ease infinite" : "none",
+        transition: "all 0.3s ease",
+      }}
+    >
+      <StatusDot status={status === "done" ? "success" : status === "failed" ? "error" : status} />
+      <span style={{ color: statusColor, fontSize: 11, letterSpacing: "0.04em" }}>
+        {SECTION_LABELS[section] || section}
+      </span>
+      {status === "done" && (
+        <span style={{ color: COLORS.success, fontSize: 10, marginLeft: "auto" }}>✓</span>
+      )}
+      {status === "failed" && (
+        <span style={{ color: COLORS.danger, fontSize: 10, marginLeft: "auto" }}>✗</span>
+      )}
+      {status === "running" && (
+        <span
+          style={{
+            marginLeft: "auto",
+            width: 8,
+            height: 8,
+            border: `1.5px solid ${color || COLORS.accent}`,
+            borderTopColor: "transparent",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+            display: "inline-block",
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function WorkflowCard({ wf, onClick, active }) {
+  const lastCycle = wf.cycles[0];
+  const successRate =
+    wf.cycles.length === 0
+      ? 100
+      : Math.round((wf.cycles.filter((c) => c.status === "success").length / wf.cycles.length) * 100);
+
+  const timeToNext = Math.max(0, wf.nextRun - Date.now());
+  const countdownSec = Math.ceil(timeToNext / 1000);
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        background: active ? COLORS.surfaceAlt : COLORS.surface,
+        border: `1px solid ${active ? wf.color + "55" : COLORS.border}`,
+        borderRadius: 8,
+        padding: "14px 16px",
+        cursor: "pointer",
+        transition: "all 0.2s ease",
+        animation: "slide-in-up 0.3s ease",
+        boxShadow: active ? `0 0 20px ${wf.color}22` : "none",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {active && (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 3,
+            background: wf.color,
+            borderRadius: "0 2px 2px 0",
+          }}
+        />
+      )}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+        <span style={{ fontSize: 16, color: wf.color }}>{wf.icon}</span>
+        <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 700, color: COLORS.text, letterSpacing: "0.02em" }}>
+          {wf.name}
+        </span>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6 }}>
+          <StatusDot status={wf.status} color={wf.color} />
+          <span
+            style={{
+              fontSize: 9,
+              letterSpacing: "0.12em",
+              color: wf.status === "running" ? wf.color : wf.status === "error" ? COLORS.danger : COLORS.textDim,
+              fontWeight: 600,
+              textTransform: "uppercase",
+            }}
+          >
+            {wf.status}
+          </span>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
+        <HealthBar value={wf.health} height={3} />
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+        <Metric label="Cycles" value={wf.cycleCount} />
+        <Metric label="Success" value={`${successRate}%`} color={successRate >= 90 ? COLORS.success : successRate >= 70 ? COLORS.warn : COLORS.danger} />
+        <Metric label={wf.status === "running" ? "Section" : "Next in"} value={wf.status === "running" && wf.currentSection ? (SECTION_LABELS[wf.currentSection] || wf.currentSection).slice(0, 10) + "…" : `${countdownSec}s`} color={wf.status === "running" ? wf.color : COLORS.textSub} />
+      </div>
+    </div>
+  );
+}
+
+function Metric({ label, value, color }) {
+  return (
+    <div>
+      <div style={{ fontSize: 9, color: COLORS.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 2 }}>{label}</div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: color || COLORS.text }}>{value}</div>
+    </div>
+  );
+}
+
+function LogLine({ entry }) {
+  const levelColor =
+    entry.level === "ERROR"
+      ? COLORS.danger
+      : entry.level === "SUCCESS"
+      ? COLORS.success
+      : entry.level === "WARN"
+      ? COLORS.warn
+      : COLORS.textSub;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        gap: 10,
+        padding: "2px 0",
+        animation: "slide-in-left 0.2s ease",
+        borderBottom: `1px solid ${COLORS.border}33`,
+      }}
+    >
+      <span style={{ color: COLORS.textDim, flexShrink: 0, fontSize: 10 }}>
+        {entry.time.slice(11)}
+      </span>
+      <span
+        style={{
+          color: levelColor,
+          flexShrink: 0,
+   
