@@ -1,213 +1,808 @@
-import requests
-import xml.etree.ElementTree as ET
-import re
-import os
-from datetime import datetime
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NINT.co.in – India's Live News Portal</title>
+<meta name="description" content="NINT – National India News Today. Breaking news, Politics, Sports, Telugu, World, Business, Student Zone. Live, AI-powered, refreshed every 5 minutes.">
+<meta name="keywords" content="India news, Telugu news, breaking news, NINT, politics, sports, UPSC, NEET, JEE, EAMCET">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Noto+Sans+Telugu:wght@400;600;700&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-# Massive Aggregator Sweep: Syncing TV9, V6, Eenadu, Sakshi & YouTube Trends via Deep Query
-feeds = {
-    "రాజకీయాలు": "https://news.google.com/rss/search?q=Telangana+Politics+OR+Revanth+Reddy+OR+KCR+OR+BRS+OR+Congress+OR+KTR+OR+Harish+Rao&hl=te&gl=IN&ceid=IN:te",
-    "జిల్లా బ్రేకింగ్": "https://news.google.com/rss/search?q=Telangana+Local+News+OR+Bhupalpally+OR+Peddapalli+OR+Kataram+OR+Warangal+OR+Karimnagar&hl=te&gl=IN&ceid=IN:te",
-    "క్రైమ్ అలర్ట్": "https://news.google.com/rss/search?q=Telangana+Crime+OR+Police+OR+Accident+OR+Arrest&hl=te&gl=IN&ceid=IN:te",
-    "రైతు రైతు-మార్కెట్": "https://news.google.com/rss/search?q=Telangana+Farmers+OR+Agriculture+OR+Gold+Price+Hyderabad+OR+Crop+Rates&hl=te&gl=IN&ceid=IN:te"
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+<style>
+:root {
+  --crimson: #C8102E;
+  --crimson-dark: #9A0B22;
+  --navy: #0D1B2A;
+  --navy-mid: #1A2E40;
+  --gold: #D4AF37;
+  --gold-light: #F0D060;
+  --cream: #FAF7F2;
+  --cream-dark: #F0EBE1;
+  --ink: #1A1108;
+  --ink-mid: #3D3020;
+  --ink-light: #6B5C48;
+  --rule: #DDD5C8;
+  --rule-dark: #C0B49E;
+  --white: #FFFFFF;
+  --green: #1A7A3C;
+  --red-ticker: #B80020;
+  --breaking-bg: #C8102E;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.10);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.13);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.18);
 }
 
-old_html = ""
-if os.path.exists("index.html"):
-    with open("index.html", "r", encoding="utf-8") as f:
-        old_html = f.read()
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-old_feeds_match = re.search(r'(.*?)', old_html, re.DOTALL)
-old_feeds_content = old_feeds_match.group(1) if old_feeds_match else ""
+html { scroll-behavior: smooth; }
 
-new_articles_html = ""
-current_date = datetime.now().strftime("%d-%m-%Y")
-locations = ["పెద్దపల్లి", "కటారం", "భూపాలపల్లి", "వరంగల్", "హైదరాబాద్", "కరీంనగర్", "ఖమ్మం", "నల్గొండ"]
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
 
-for category, url in feeds.items():
-    try:
-        response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
-        root = ET.fromstring(response.content)
-        items = root.findall('.//item')
-        
-        for item in items[:5]: # Deep sweep top 5 items
-            title = item.find('title').text if item.find('title') is not None else ""
-            link = item.find('link').text if item.find('link') is not None else "#"
-            desc = item.find('description').text if item.find('description') is not None else ""
-            
-            title = re.sub(r'\s-\s.*$', '', title)
-            
-            if title in old_html or link in old_html:
-                continue
+/* ── BREAKING TICKER ── */
+.ticker-bar {
+  background: var(--crimson);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  height: 34px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ticker-label {
+  background: var(--navy);
+  color: var(--gold);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 0 14px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border-right: 2px solid var(--gold);
+}
+.ticker-label span { animation: blink 1.2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.ticker-track {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.ticker-inner {
+  display: flex;
+  white-space: nowrap;
+  animation: ticker 60s linear infinite;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+.ticker-inner span {
+  padding: 0 40px;
+  border-right: 1px solid rgba(255,255,255,.3);
+}
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
 
-            match = re.search(r'>([^<]+)</a>', desc)
-            if match:
-                desc = match.group(1).strip()
-            if len(desc) < 10 or "&nbsp;" in desc:
-                desc = "తెలంగాణలో సంచలనం సృష్టిస్తున్న ఈ లేటెస్ట్ బ్రేకింగ్ టాపిక్ కి సంబంధించిన పూర్తి వివరాలు నెట్‌వర్క్ లో అందుబాటులోకి వచ్చాయి..."
+/* ── TOP AD BAR ── */
+.top-ad {
+  background: var(--cream-dark);
+  border-bottom: 1px solid var(--rule);
+  text-align: center;
+  padding: 6px 0;
+  font-size: 11px;
+  color: var(--ink-light);
+  letter-spacing: .5px;
+}
+.ad-slot {
+  background: #e8e2d8;
+  border: 1px dashed #b0a898;
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.ad-slot-leaderboard { width: min(728px, 98vw); height: 90px; }
+.ad-slot-rect { width: 300px; height: 250px; }
+.ad-slot-banner { width: 100%; height: 60px; }
 
-            area_tag = "తెలంగాణ"
-            for loc in locations:
-                if loc in title or loc in desc:
-                    area_tag = loc
-                    break
-            
-            img_url = "https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?w=600"
-            if category == "రాజకీయాలు":
-                img_url = "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600"
-            elif category == "క్రైమ్ అలర్ట్":
-                img_url = "https://images.unsplash.com/photo-1610473187211-137b0d7715ec?w=600"
-            elif category == "రైతు రైతు-మార్కెట్":
-                img_url = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" if "Price" in title or "Gold" in title else "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=600"
+/* ── MASTHEAD ── */
+.masthead {
+  background: var(--navy);
+  padding: 0;
+  border-bottom: 4px solid var(--crimson);
+  position: relative;
+  overflow: hidden;
+}
+.masthead::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4AF37' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.masthead-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 10px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.masthead-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(42px, 8vw, 76px);
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: -2px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.brand-name em {
+  color: var(--gold);
+  font-style: normal;
+}
+.brand-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-top: 2px;
+  opacity: .85;
+}
+.masthead-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.masthead-date {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,.65);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.refresh-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: .5px;
+}
+.refresh-dot {
+  width: 7px; height: 7px;
+  background: #4CFF72;
+  border-radius: 50%;
+  animation: pulse-green 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse-green {
+  0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)}
+}
+.live-channels-bar {
+  background: var(--navy-mid);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.live-channels-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 6px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.live-channels-inner::-webkit-scrollbar { display: none; }
+.channel-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-transform: uppercase;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+.channel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.85);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all .2s;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.channel-btn:hover {
+  background: var(--crimson);
+  border-color: var(--crimson);
+  color: #fff;
+}
+.channel-btn .dot {
+  width: 5px; height: 5px;
+  background: #FF4040;
+  border-radius: 50%;
+  animation: pulse-green 1s infinite;
+}
 
-            safe_title = title.replace("'", "\\'")
+/* ── NAV ── */
+nav.main-nav {
+  background: var(--crimson);
+  border-bottom: 2px solid var(--crimson-dark);
+  position: sticky;
+  top: 34px;
+  z-index: 90;
+}
+.nav-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0 20px;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-link {
+  display: block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.88);
+  padding: 10px 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: all .18s;
+}
+.nav-link:hover, .nav-link.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+.nav-link.telugu { color: var(--gold-light); }
 
-            new_articles_html += f"""
-            <div class="news-card">
-                <img src="{img_url}" alt="NINT Local">
-                <div class="news-body">
-                    <span class="news-meta">📍 {area_tag} | {current_date}</span>
-                    <h2>{title}</h2>
-                    <p>{desc[:180]}...</p>
-                    <div class="card-actions">
-                        <a href="{link}" target="_blank" class="read-more-btn">చదవండి →</a>
-                        <button class="share-btn" onclick="shareNews('{safe_title}', '{link}')">📲 షేర్</button>
-                    </div>
-                </div>
-            </div>
-            """
-    except Exception as e:
-        print(f"Error compiling {category}: {e}")
+/* ── LAYOUT ── */
+.container { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
 
-combined_feeds = new_articles_html + old_feeds_content
-all_cards = re.findall(r'<div class="news-card">.*?</div>\s*</div>\s*</div>', combined_feeds, re.DOTALL)
-if not all_cards:
-    all_cards = re.findall(r'<div class="news-card">.*?</div>\s*</div>', combined_feeds, re.DOTALL)
+.page-grid {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  padding: 24px 0;
+}
+@media(max-width: 900px) {
+  .page-grid { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+}
 
-final_grid_html = "\n".join(all_cards[:45])
-total_count = len(all_cards[:45])
+/* ── SECTION HEADERS ── */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 3px solid var(--crimson);
+}
+.section-head h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1;
+}
+.section-head .tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: var(--crimson);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+.section-block { margin-bottom: 32px; }
 
-full_html = f"""<!DOCTYPE html>
-<html lang="te">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NINT - తెలంగాణ లైవ్ ఫీడ్</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;700;900&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
-    <style>
-        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: 'Noto Sans Telugu', 'Inter', sans-serif; background-color: #f0f2f5; color: #1c1e21; line-height: 1.5; }}
-        header {{ background: linear-gradient(135deg, #18191a, #242526); text-align: center; padding: 40px 20px; border-bottom: 5px solid #dc2626; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }}
-        header h1 {{ font-size: 3.5em; font-weight: 900; letter-spacing: 3px; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }}
-        header p {{ color: #a0aab4; font-size: 1.1em; margin-top: 8px; font-weight: bold; }}
-        .container {{ max-width: 1300px; margin: 40px auto; padding: 0 20px; }}
-        .news-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }}
-        .news-card {{ background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; transition: all 0.3s ease; display: flex; flex-direction: column; }}
-        .news-card:hover {{ transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: #d1d5db; }}
-        .news-card img {{ width: 100%; height: 200px; object-fit: cover; }}
-        .news-body {{ padding: 25px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }}
-        .news-meta {{ font-size: 0.85em; color: #dc2626; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; display: block; }}
-        .news-card h2 {{ color: #1c1e21; font-size: 1.35em; font-weight: 800; line-height: 1.4; margin-bottom: 12px; min-height: 2.8em; }}
-        .news-card p {{ color: #4b5563; font-size: 1.02em; line-height: 1.6; margin-bottom: 20px; }}
-        
-        .card-actions {{ display: flex; gap: 12px; width: 100%; margin-top: auto; }}
-        .read-more-btn {{ flex: 1; text-align: center; background-color: #1c1e21; color: white; padding: 12px 10px; text-decoration: none; font-weight: 700; font-size: 0.9em; border-radius: 8px; transition: 0.2s; }}
-        .read-more-btn:hover {{ background-color: #dc2626; }}
-        
-        .share-btn {{ flex: 1; background-color: #25d366; color: white; border: none; padding: 12px 10px; font-weight: 700; font-size: 0.9em; border-radius: 8px; cursor: pointer; transition: 0.2s; }}
-        .share-btn:hover {{ background-color: #128c7e; }}
-        
-        footer {{ background-color: #18191a; color: #a0aab4; padding: 50px 0 30px 0; margin-top: 60px; border-top: 5px solid #dc2626; }}
-        .footer-container {{ display: grid; grid-template-columns: 2fr 1fr; gap: 40px; max-width: 1300px; margin: 0 auto; padding: 0 20px; text-align: left; }}
-        .footer-about h3, .footer-links h3 {{ color: #ffffff; font-size: 1.3em; margin-bottom: 15px; border-left: 4px solid #dc2626; padding-left: 12px; font-weight: bold; }}
-        .footer-about p {{ font-size: 1.1em; line-height: 1.7; color: #cbd5e1; font-weight: 600; }}
-        .footer-links a {{ color: #a0aab4; text-decoration: none; font-weight: bold; font-size: 1em; display: inline-block; margin: 5px 0; transition: 0.2s; }}
-        .footer-links a:hover {{ color: #dc2626; }}
-        .copyright {{ text-align: center; margin-top: 40px; border-top: 1px solid #242526; padding-top: 25px; font-size: 0.95em; color: #64748b; font-weight: bold; }}
-        
-        .custom-modal {{ display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); padding-top: 100px; }}
-        .modal-content {{ background-color: #ffffff; color: #1c1e21; margin: auto; padding: 35px; border-radius: 16px; width: 85%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }}
-        .modal-content h2 {{ font-size: 1.8em; margin-bottom: 15px; color: #0f172a; border-bottom: 3px solid #dc2626; padding-bottom: 8px; }}
-        .modal-content p {{ font-size: 1.05em; line-height: 1.7; color: #334155; }}
-        .close-modal {{ color: #64748b; float: right; font-size: 30px; font-weight: bold; cursor: pointer; line-height: 1; margin-top: -10px; }}
-        .close-modal:hover {{ color: #dc2626; }}
-    </style>
-</head>
-<body>
+/* ── HERO ── */
+.hero-story {
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 24px;
+  transition: box-shadow .2s;
+}
+.hero-story:hover { box-shadow: var(--shadow-lg); }
+.hero-img {
+  width: 100%;
+  height: 340px;
+  object-fit: cover;
+  display: block;
+  background: linear-gradient(135deg, #1A2E40 0%, #C8102E 100%);
+  position: relative;
+}
+.hero-img-placeholder {
+  width: 100%;
+  height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 48px;
+  color: rgba(255,255,255,.18);
+  background: linear-gradient(135deg, #1A2E40 0%, #0D1B2A 50%, #9A0B22 100%);
+  position: relative;
+  overflow: hidden;
+}
+.hero-img-placeholder::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 60%, rgba(212,175,55,.10) 0%, transparent 65%);
+}
+.hero-content { padding: 20px 24px 24px; }
+.hero-kicker {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--crimson);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hero-kicker::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--crimson);
+}
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 900;
+  line-height: 1.18;
+  color: var(--navy);
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.hero-title:hover { color: var(--crimson); }
+.hero-deck {
+  font-size: 15px;
+  color: var(--ink-mid);
+  line-height: 1.65;
+  margin-bottom: 14px;
+}
+.hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-light);
+  letter-spacing: .3px;
+}
+.hero-meta .source { color: var(--crimson); font-weight: 700; }
 
-<header>
-    <h1>NINT NEWS</h1>
-    <p>⚡ తెలంగాణ హైపర్-లోకల్ లైవ్ టైమ్-లైన్ డ్యాష్‌బోర్డ్</p>
-</header>
+/* ── CARD GRID ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.news-card {
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all .2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+.news-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.card-thumb {
+  width: 100%;
+  height: 160px;
+  background: linear-gradient(135deg, var(--navy) 0%, #264059 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.card-thumb::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, rgba(0,0,0,.3));
+}
+.card-body { padding: 14px 14px 16px; flex: 1; display: flex; flex-direction: column; }
+.card-kicker {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--crimson);
+  margin-bottom: 6px;
+}
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--navy);
+  margin-bottom: 8px;
+  flex: 1;
+}
+.card-meta {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-light);
+  margin-top: auto;
+  letter-spacing: .2px;
+}
 
-<div class="container">
-    <div class="news-grid">
-        {final_grid_html}
-        </div>
-</div>
+/* ── TOP 5 LIST ── */
+.top5-list { display: flex; flex-direction: column; gap: 0; }
+.top5-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background .15s;
+}
+.top5-item:last-child { border-bottom: none; }
+.top5-item:hover { background: rgba(200,16,46,.03); }
+.top5-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 38px;
+  font-weight: 900;
+  color: var(--rule-dark);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 44px;
+  text-align: right;
+  margin-top: -4px;
+}
+.top5-text {}
+.top5-kicker {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--crimson);
+  margin-bottom: 4px;
+}
+.top5-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--navy);
+}
+.top5-item:hover .top5-title { color: var(--crimson); }
+.top5-meta {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-light);
+  margin-top: 4px;
+}
 
-<footer>
-    <div class="footer-container">
-        <div class="footer-about">
-            <h3>NINT NEWS గుండెచప్పుడు</h3>
-            <p>తెలంగాణ గుండెచప్పుడు.. నిమిష నిమిషానికి లైవ్ అప్‌డేట్స్! NINT NEWS అంటే సోది లేని వార్తలు, పక్కా లోకల్ నిజాలు. రాజకీయం, క్రైమ్, మార్కెట్, రైతు రాతలు—ఎక్కడ ఏది జరిగినా అందరికంటే ముందే మీ స్క్రీన్ పైకి వస్తుంది. పక్షపాతం లేదు, ప్రచారం లేదు.. కేవలం ప్యూర్ బ్రేకింగ్ ఇన్ఫర్మేషన్!</p>
-        </div>
-        <div class="footer-links">
-            <h3>లీగల్ సిస్టమ్</h3>
-            <a href="#" onclick="openModal('privacy'); return false;">🔒 Privacy Policy</a><br>
-            <a href="#" onclick="openModal('terms'); return false;">⚖️ Terms & Conditions</a>
-        </div>
-    </div>
-    <p class="copyright">&copy; 2026 NINT NEWS NETWORK • Chief Editor: Kavya • టోటల్ ఫీడ్స్: {total_count}</p>
-</footer>
+/* ── TELUGU SECTION ── */
+.telugu-section { background: var(--navy); border-radius: 4px; padding: 20px; margin-bottom: 32px; }
+.telugu-section .section-head h2 { color: var(--gold); font-size: 22px; }
+.telugu-section .section-head { border-bottom-color: var(--gold); }
+.telugu-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.telugu-card {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 3px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.telugu-card:hover { background: rgba(200,16,46,.2); border-color: var(--crimson); }
+.telugu-card-title {
+  font-family: 'Noto Sans Telugu', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cream);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.telugu-card-sub {
+  font-family: 'Noto Sans Telugu', sans-serif;
+  font-size: 12px;
+  color: rgba(255,255,255,.55);
+  line-height: 1.5;
+}
+.telugu-card-meta {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold);
+  margin-top: 8px;
+  letter-spacing: .5px;
+}
 
-<div id="privacyModal" class="custom-modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeModal('privacy')">&times;</span>
-        <h2>Privacy Policy</h2>
-        <p>NINT NEWS కు స్వాగతం. మా వెబ్‌సైట్ యూజర్ల వ్యక్తిగత సమాచారాన్ని లేదా బ్రౌజింగ్ హిస్టరీని సేకరించదు. మేము కేవలం పబ్లిక్ RSS ఫీడ్స్ ఆధారంగా ఆటోమేటెడ్ పద్ధతిలో వార్తలను బ్రీఫ్ చేసి అందిస్తాము. మా సైట్ లో ప్రదర్శించబడే థర్డ్-పార్టీ యాడ్స్ (Google AdSense) వారి సొంత పాలసీల ప్రకారం కుకీస్ ని ఉపయోగించవచ్చు.</p>
-    </div>
-</div>
+/* ── STUDENT ZONE ── */
+.student-zone {
+  background: linear-gradient(135deg, #0D1B2A 0%, #1A2E40 100%);
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 32px;
+  border: 2px solid var(--gold);
+}
+.student-zone .section-head h2 { color: var(--gold); }
+.student-zone .section-head { border-bottom-color: var(--gold); }
+.exams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.exam-card {
+  background: rgba(212,175,55,.08);
+  border: 1px solid rgba(212,175,55,.25);
+  border-radius: 4px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+}
+.exam-card:hover { background: var(--crimson); border-color: var(--crimson); }
+.exam-card .exam-icon { font-size: 28px; margin-bottom: 6px; }
+.exam-card .exam-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.exam-card .exam-date {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: rgba(255,255,255,.55);
+  margin-top: 3px;
+}
+.student-news { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.student-item {
+  background: rgba(255,255,255,.05);
+  border-left: 3px solid var(--gold);
+  padding: 10px 12px;
+  border-radius: 0 3px 3px 0;
+  cursor: pointer;
+}
+.student-item:hover { background: rgba(255,255,255,.09); }
+.student-item-title {
+  font-family: 'Source Serif 4', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cream);
+  line-height: 1.4;
+}
+.student-item-meta {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: var(--gold);
+  margin-top: 4px;
+  font-weight: 600;
+  letter-spacing: .5px;
+}
 
-<div id="termsModal" class="custom-modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeModal('terms')">&times;</span>
-        <h2>Terms & Conditions</h2>
-        <p>NINT NEWS లోని సమాచారం అంతా ఆర్టిఫిషియల్ ఇంటెలిజెన్స్ (AI) మరియు RSS ఇంజిన్ల ద్వారా ఆటోమేటెడ్ పద్ధతిలో వివిధ ప్రచురణల నుండి సేకరించబడుతుంది. ఈ వార్తల యొక్క ప్రాథమిక ఖచ్చితత్వానికి ఒరిజినల్ పబ్లిషర్స్ మాత్రమే బాధ్యులు. యూజర్లు కేవలం సమాచార అవగాహన కొరకు మాత్రమే ఈ సైట్ ని ఉపయోగించవలెను.</p>
-    </div>
-</div>
+/* ── SIDEBAR ── */
+.sidebar { display: flex; flex-direction: column; gap: 20px; }
 
-<script>
-function shareNews(title, link) {{
-    const shareData = {{
-        title: title,
-        text: title + " \\n\\n👉 పూర్తి వివరాల కోసం NINT News చూడండి: \\n",
-        url: link
-    }};
-    if (navigator.share) {{
-        navigator.share(shareData).catch((error) => console.log('Error sharing:', error));
-    }} else {{
-        const whatsappUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(title + "\\n" + link);
-        window.open(whatsappUrl, '_blank');
-    }}
-}}
+.sidebar-widget {
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.widget-head {
+  background: var(--navy);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.widget-head h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  line-height: 1;
+}
+.widget-body { padding: 12px 14px; }
 
-function openModal(type) {{
-    document.getElementById(type + 'Modal').style.display = 'block';
-}}
-function closeModal(type) {{
-    document.getElementById(type + 'Modal').style.display = 'none';
-}}
-window.onclick = function(event) {{
-    if (event.target.className === 'custom-modal') {{
-        event.target.style.display = 'none';
-    }}
-}}
-</script>
+/* Markets */
+.market-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+}
+.market-row:last-child { border-bottom: none; }
+.market-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: .5px; color: var(--ink); }
+.market-val { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; }
+.market-chg { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; }
+.up { color: #1A7A3C; }
+.down { color: #CC2222; }
 
-</body>
-</html>"""
+/* Trending */
+.trend-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+}
+.trend-item:last-child { border-bottom: none; }
+.trend-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--rule-dark);
+  flex-shrink: 0;
+  width: 22px;
+  line-height: 1;
+}
+.trend-text {
+  font-family: 'Source Serif 4', serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.trend-item:hover .trend-text { color: var(--crimson); }
+.trend-count {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: var(--ink-light);
+  margin-top: 2px;
+}
 
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(full_html)
-print("Master Journalist Edition Successfully Written with Editor Identity!")
+/* Weather */
+.weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.weather-city {
+  background: var(--cream);
+  border-radius: 3px;
+  padding: 8px 10px;
+  text-align: center;
+}
+.weather-city-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+.weather-temp {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.1;
+}
+.weather-cond {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: var(--ink-light);
+}
+
+/* Poll */
+.poll-question {
+  font-family: 'Source Serif 4', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+.poll-option {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.poll-option-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  display: flex;
+  justify-content: space-between;
+}
+.poll-bar-track { height: 6px; background: var(--cream-dark); border-radius: 3px; overflow: hidden; }
+.poll-bar-fill { height: 100%; background: var(--crimson); border-radius: 3px; transition: width .5s ease; }
+.poll-total {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: var(--ink-light);
+  margin-top: 4px;
+}
+
+/* ── AI STATU
